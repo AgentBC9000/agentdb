@@ -23,7 +23,6 @@ stripe==10.2.0
 # AI / Embeddings
 openai==1.35.3
 anthropic==0.30.0
-openai-whisper==20231117
 
 # Scraping
 playwright==1.44.0
