@@ -26,22 +26,22 @@ YOUTUBE_SOURCES = [
     },
     {
         "name": "Closer To Truth",
-        "channel_id": "UCmqpBGghD64IXv_3E0-0-dw",
+        "channel_id": "UCl9StMQ79LtEvlrskzjoYbQ",
         "category": "philosophy_science",
     },
     {
         "name": "Y Combinator",
-        "channel_id": "UCcefcZRL2oaA_uBNeo5UNqg",
+        "channel_id": "UCcefcZRL2oaA_uBNeo5UOWg",
         "category": "startups_technology",
     },
     {
         "name": "Rebel Capitalist",
-        "channel_id": "UCEkOSI83opT0MiYbC-sjobg",
+        "channel_id": "UCNjyEXSvYUUCzagFAKmaJ1Q",
         "category": "market_news_alternative",
     },
     {
         "name": "Bernardo Kastrup",
-        "channel_id": "UCdv9TZpwBlGEIV7kVnDuHNQ",
+        "channel_id": "UCeDZCa3VrRQvzBlVR-oVVmA",
         "category": "philosophy_science",
     },
 ]

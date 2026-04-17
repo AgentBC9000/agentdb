@@ -27,15 +27,16 @@ YT_NS = "http://www.youtube.com/xml/schemas/2015"
 TRANSCRIPT_LANGUAGES = ["en", "en-US", "en-GB", "en-CA", "en-AU"]
 
 
-def get_latest_video(channel_id: str) -> Optional[dict]:
+def get_recent_videos(channel_id: str, max_count: int = 3) -> list:
     """
-    Fetch the YouTube RSS feed for a channel and return metadata for the latest video.
+    Fetch the YouTube RSS feed for a channel and return metadata for recent videos.
 
     Args:
         channel_id: YouTube channel ID string.
+        max_count: Maximum number of recent videos to return.
 
     Returns:
-        Dict with keys ``video_id`` and ``title``, or None on failure.
+        List of dicts with keys ``video_id`` and ``title``.
     """
     url = RSS_FEED_URL.format(channel_id=channel_id)
     try:
@@ -44,34 +45,28 @@ def get_latest_video(channel_id: str) -> Optional[dict]:
             response.raise_for_status()
     except httpx.HTTPError as exc:
         logger.error("HTTP error fetching RSS feed for channel %s: %s", channel_id, exc)
-        return None
+        return []
     except Exception as exc:
         logger.error("Unexpected error fetching RSS feed for channel %s: %s", channel_id, exc)
-        return None
+        return []
 
     try:
         root = ElementTree.fromstring(response.content)
     except ElementTree.ParseError as exc:
         logger.error("Failed to parse RSS XML for channel %s: %s", channel_id, exc)
-        return None
+        return []
 
-    # The first <entry> in the Atom feed is the most recent video
-    entry = root.find(f"{{{YOUTUBE_NS}}}entry")
-    if entry is None:
-        logger.warning("No entries found in RSS feed for channel %s", channel_id)
-        return None
-
-    video_id_el = entry.find(f"{{{YT_NS}}}videoId")
-    title_el = entry.find(f"{{{YOUTUBE_NS}}}title")
-
-    if video_id_el is None or title_el is None:
-        logger.warning("Missing videoId or title in RSS feed for channel %s", channel_id)
-        return None
-
-    return {
-        "video_id": video_id_el.text.strip(),
-        "title": title_el.text.strip(),
-    }
+    entries = root.findall(f"{{{YOUTUBE_NS}}}entry")
+    videos = []
+    for entry in entries[:max_count]:
+        video_id_el = entry.find(f"{{{YT_NS}}}videoId")
+        title_el = entry.find(f"{{{YOUTUBE_NS}}}title")
+        if video_id_el is not None and title_el is not None:
+            videos.append({
+                "video_id": video_id_el.text.strip(),
+                "title": title_el.text.strip(),
+            })
+    return videos
 
 
 def get_transcript(video_id: str) -> Optional[str]:
@@ -140,31 +135,30 @@ def scrape_youtube_source(channel_id: str, source_name: str) -> Optional[dict]:
     Returns:
         Dict with keys ``video_id``, ``title``, ``transcript``, ``url``, or None on failure.
     """
-    logger.info("Fetching latest video for %s (channel: %s)", source_name, channel_id)
+    logger.info("Fetching recent videos for %s (channel: %s)", source_name, channel_id)
 
-    video_meta = get_latest_video(channel_id)
-    if video_meta is None:
-        logger.warning("Could not retrieve latest video for %s", source_name)
+    videos = get_recent_videos(channel_id, max_count=3)
+    if not videos:
+        logger.warning("Could not retrieve any videos for %s", source_name)
         return None
 
-    video_id = video_meta["video_id"]
-    title = video_meta["title"]
-    url = VIDEO_URL.format(video_id=video_id)
+    # Try each video until we find one with a transcript
+    for video_meta in videos:
+        video_id = video_meta["video_id"]
+        title = video_meta["title"]
+        url = VIDEO_URL.format(video_id=video_id)
 
-    logger.info("Found video '%s' (%s) — fetching transcript", title, video_id)
+        logger.info("Trying video '%s' (%s)", title, video_id)
+        transcript = get_transcript(video_id)
+        if transcript:
+            logger.info("Retrieved transcript for '%s' (%d chars)", title, len(transcript))
+            return {
+                "video_id": video_id,
+                "title": title,
+                "transcript": transcript,
+                "url": url,
+            }
+        logger.info("No transcript for '%s' — trying next video", title)
 
-    transcript = get_transcript(video_id)
-    if transcript is None:
-        logger.warning("No transcript available for '%s' (%s)", title, video_id)
-        return None
-
-    logger.info(
-        "Retrieved transcript for '%s' (%d chars)", title, len(transcript)
-    )
-
-    return {
-        "video_id": video_id,
-        "title": title,
-        "transcript": transcript,
-        "url": url,
-    }
+    logger.warning("No transcript available for any recent video from %s", source_name)
+    return None
