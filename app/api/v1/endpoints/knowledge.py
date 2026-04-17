@@ -187,17 +187,16 @@ async def get_item(
 @router.post("/ingest", status_code=201)
 async def ingest_item(
     payload: IngestRequest,
-    authorization: Optional[str] = Header(None),
+    secret: Optional[str] = Query(None),
     db=Depends(get_db),
 ):
     """
     Admin endpoint — ingest a new knowledge item.
-    Requires Authorization: Bearer <admin-secret> header.
+    Requires ?secret=<admin-secret> query parameter.
     Not accessible to regular API keys.
     """
-    token = authorization.replace("Bearer ", "").strip() if authorization else None
-    if token != settings.ADMIN_SECRET:
-        raise HTTPException(status_code=403, detail="Invalid admin secret")
+    if secret != settings.ADMIN_SECRET:
+        raise HTTPException(status_code=403, detail=f"Invalid admin secret (got: {repr(secret)}, expected len: {len(settings.ADMIN_SECRET)})")
 
     item_id = str(uuid.uuid4())
 
