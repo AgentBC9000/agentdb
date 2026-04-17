@@ -4,10 +4,7 @@ from app.core.config import settings
 
 # Async DB for FastAPI (queries)
 # statement_cache_size=0 required for Supabase PgBouncer (transaction pooling mode)
-_db_url = settings.DATABASE_URL
-if "statement_cache_size" not in _db_url:
-    _db_url += ("&" if "?" in _db_url else "?") + "statement_cache_size=0"
-database = databases.Database(_db_url)
+database = databases.Database(settings.DATABASE_URL, statement_cache_size=0)
 
 # Supabase client (auth, storage, admin ops)
 supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
