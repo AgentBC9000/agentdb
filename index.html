@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentDB — The knowledge layer for AI agents</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --accent: #00d4ff;
+      --accent-dim: rgba(0, 212, 255, 0.12);
+      --accent-border: rgba(0, 212, 255, 0.3);
+      --bg: #0a0a0a;
+      --bg-1: #111113;
+      --bg-2: #18181b;
+      --bg-3: #222226;
+      --text: #f0f0f2;
+      --text-dim: #8a8a9a;
+      --text-muted: #555566;
+      --border: #2a2a30;
+      --radius: 8px;
+      --mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 10, 10, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .nav-logo span {
+      color: var(--accent);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: none;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      background: #19daff;
+      text-decoration: none;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(0, 212, 255, 0.35);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      text-decoration: none;
+      transform: translateY(-1px);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 100px 24px 80px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 .accent {
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: 1.1rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 36px;
+      max-width: 480px;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .hero-code {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-2);
+    }
+
+    .code-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .code-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--bg-3);
+    }
+
+    .code-dots span:nth-child(1) { background: #ff5f57; }
+    .code-dots span:nth-child(2) { background: #febc2e; }
+    .code-dots span:nth-child(3) { background: #28c840; }
+
+    .code-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    pre {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.7;
+      padding: 20px;
+      overflow-x: auto;
+      color: #c9d1d9;
+    }
+
+    .t-comment { color: #6e7681; }
+    .t-key     { color: #79c0ff; }
+    .t-str     { color: #a5d6ff; }
+    .t-val     { color: #d2a8ff; }
+    .t-cmd     { color: var(--accent); }
+    .t-flag    { color: #ff7b72; }
+    .t-url     { color: #ffa657; }
+    .t-num     { color: #f0883e; }
+    .t-bool    { color: #79c0ff; }
+    .t-brace   { color: #e6edf3; }
+
+    /* ── SECTION SHARED ── */
+    section {
+      border-top: 1px solid var(--border);
+    }
+
+    .section-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 88px 24px;
+    }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--accent);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.25rem);
+      font-weight: 700;
+      letter-spacing: -0.75px;
+      margin-bottom: 48px;
+      color: var(--text);
+    }
+
+    /* ── HOW IT WORKS ── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .step {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px 28px;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+
+    .step:hover {
+      border-color: var(--accent-border);
+    }
+
+    .step-number {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    .step h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .step p {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .step-icon {
+      font-size: 1.75rem;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    /* connector arrows between steps */
+    .steps-wrapper {
+      position: relative;
+    }
+
+    /* ── CODE EXAMPLE ── */
+    .code-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .code-block {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    /* ── PRICING ── */
+    #pricing {
+      background: var(--bg-1);
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .plan {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .plan:hover {
+      transform: translateY(-3px);
+    }
+
+    .plan.featured {
+      border-color: var(--accent);
+      background: linear-gradient(160deg, rgba(0, 212, 255, 0.07) 0%, var(--bg-2) 60%);
+      position: relative;
+    }
+
+    .plan-badge {
+      position: absolute;
+      top: -1px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: #000;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 12px;
+      border-radius: 0 0 8px 8px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .plan-name {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .plan-price {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .plan-price sup {
+      font-size: 1.2rem;
+      vertical-align: top;
+      margin-top: 6px;
+      display: inline-block;
+    }
+
+    .plan-cadence {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .plan-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 20px 0;
+    }
+
+    .plan-features {
+      list-style: none;
+      margin-bottom: 32px;
+      flex: 1;
+    }
+
+    .plan-features li {
+      font-size: 0.875rem;
+      color: var(--text-dim);
+      padding: 6px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .plan-features li::before {
+      content: '✓';
+      color: var(--accent);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .plan .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* Register snippet modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-1);
+      border: 1px solid var(--accent-border);
+      border-radius: 14px;
+      max-width: 620px;
+      width: 100%;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0,212,255,0.1);
+      animation: modal-in 0.2s ease;
+    }
+
+    @keyframes modal-in {
+      from { opacity: 0; transform: scale(0.95) translateY(8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-2);
+    }
+
+    .modal-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1.3rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .modal-close:hover {
+      color: var(--text);
+      background: var(--bg-3);
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-desc {
+      font-size: 0.875rem;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+    }
+
+    .modal-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .tab-btn {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      padding: 4px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-dim);
+      border-color: var(--accent-border);
+      color: var(--accent);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .copy-btn {
+      margin-top: 12px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      padding: 6px 14px;
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .copy-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-logo {
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .footer-logo span { color: var(--accent); }
+
+    .footer-tagline {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      font-size: 0.875rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .footer-copy {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      width: 100%;
+      margin-top: 12px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 860px) {
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 60px 24px 60px;
+        gap: 40px;
+      }
+
+      .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .code-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .pricing-grid {
+        grid-template-columns: 1fr;
+        max-width: 420px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .section-inner {
+        padding: 60px 20px;
+      }
+
+      .hero {
+        padding: 48px 20px 48px;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <nav>
+    <div class="nav-inner">
+      <div class="nav-logo">Agent<span>DB</span></div>
+      <a href="#pricing" class="btn btn-primary" onclick="openRegister(event)">Start Free Trial</a>
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-badge">API-first &middot; Real-time &middot; Agent-native</div>
+      <h1>The <span class="accent">knowledge layer</span> for AI agents</h1>
+      <p class="hero-sub">
+        Real-time curated knowledge, structured and compressed for autonomous AI agents.
+        Query exactly what your agent needs — no scraping, no hallucinations, no noise.
+      </p>
+      <div class="hero-ctas">
+        <a href="#pricing" class="btn btn-primary" onclick="openRegister(event)">Start Free Trial</a>
+        <a href="https://agentdb-production-9ba0.up.railway.app/docs" target="_blank" rel="noopener" class="btn btn-outline">View Docs</a>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="hero-code">
+        <div class="code-header">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <div class="code-label">QUICK START</div>
+        </div>
+        <pre><span class="t-comment"># Query AgentDB from your agent</span>
+<span class="t-cmd">curl</span> <span class="t-flag">-X GET</span> \
+  <span class="t-url">"https://agentdb-production-9ba0.up.railway.app/v1/query"</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer &lt;your-api-key&gt;"</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"Content-Type: application/json"</span> \
+  <span class="t-flag">-d</span> <span class="t-str">'{"q": "latest AI research papers"}'</span>
+
+<span class="t-comment"># Response — structured, ready to use</span>
+<span class="t-brace">{</span>
+  <span class="t-key">"results"</span><span class="t-brace">:</span> <span class="t-brace">[{</span>
+    <span class="t-key">"title"</span><span class="t-brace">:</span>    <span class="t-str">"Attention Is All You Need"</span><span class="t-brace">,</span>
+    <span class="t-key">"summary"</span><span class="t-brace">:</span>  <span class="t-str">"Transformer architecture..."</span><span class="t-brace">,</span>
+    <span class="t-key">"relevance"</span><span class="t-brace">:</span> <span class="t-num">0.97</span>
+  <span class="t-brace">}]</span>
+<span class="t-brace">}</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── HOW IT WORKS ── -->
+  <section>
+    <div class="section-inner">
+      <div class="section-label">How it works</div>
+      <h2 class="section-title">Three steps to agent-ready knowledge</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">01</div>
+          <h3>Register</h3>
+          <p>
+            Call the <code style="font-family:var(--mono);font-size:0.78rem;color:var(--accent)">/v1/auth/register</code> endpoint
+            with your agent's identifier. Get an API key back instantly — no dashboard, no forms.
+          </p>
+        </div>
+        <div class="step">
+          <div class="step-number">02</div>
+          <h3>Query</h3>
+          <p>
+            Send natural-language or structured queries to the API. Get back curated, compressed,
+            deduped knowledge — formatted exactly for agent consumption.
+          </p>
+        </div>
+        <div class="step">
+          <div class="step-number">03</div>
+          <h3>Act</h3>
+          <p>
+            Feed structured results directly into your agent's context. Less tokens, higher signal,
+            better decisions. Ship faster without building your own data pipeline.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CODE EXAMPLE ── -->
+  <section>
+    <div class="section-inner">
+      <div class="section-label">Code examples</div>
+      <h2 class="section-title">Works with any agent stack</h2>
+      <div class="code-grid">
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="code-label">REQUEST — cURL</div>
+          </div>
+          <pre><span class="t-comment"># Register a new agent</span>
+<span class="t-cmd">curl</span> <span class="t-flag">-X POST</span> \
+  <span class="t-url">"https://agentdb-production-9ba0.up.railway.app/v1/auth/register"</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"Content-Type: application/json"</span> \
+  <span class="t-flag">-d</span> <span class="t-str">'{
+    "agent_id": "my-research-agent",
+    "plan":     "trial"
+  }'</span>
+
+<span class="t-comment"># Query for knowledge</span>
+<span class="t-cmd">curl</span> <span class="t-flag">-X POST</span> \
+  <span class="t-url">"https://agentdb-production-9ba0.up.railway.app/v1/query"</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer $API_KEY"</span> \
+  <span class="t-flag">-d</span> <span class="t-str">'{
+    "q":      "recent breakthroughs in LLM reasoning",
+    "limit":  5,
+    "format": "compressed"
+  }'</span></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="code-label">RESPONSE — JSON</div>
+          </div>
+          <pre><span class="t-brace">{</span>
+  <span class="t-key">"status"</span><span class="t-brace">:</span>   <span class="t-str">"ok"</span><span class="t-brace">,</span>
+  <span class="t-key">"query"</span><span class="t-brace">:</span>   <span class="t-str">"recent breakthroughs in LLM reasoning"</span><span class="t-brace">,</span>
+  <span class="t-key">"count"</span><span class="t-brace">:</span>   <span class="t-num">5</span><span class="t-brace">,</span>
+  <span class="t-key">"results"</span><span class="t-brace">: [</span>
+    <span class="t-brace">{</span>
+      <span class="t-key">"id"</span><span class="t-brace">:</span>         <span class="t-str">"kb_8f2a1c"</span><span class="t-brace">,</span>
+      <span class="t-key">"title"</span><span class="t-brace">:</span>      <span class="t-str">"Chain-of-Thought Prompting"</span><span class="t-brace">,</span>
+      <span class="t-key">"summary"</span><span class="t-brace">:</span>    <span class="t-str">"Elicits multi-step reasoning..."</span><span class="t-brace">,</span>
+      <span class="t-key">"source"</span><span class="t-brace">:</span>     <span class="t-str">"arxiv.org/abs/2201.11903"</span><span class="t-brace">,</span>
+      <span class="t-key">"relevance"</span><span class="t-brace">:</span>  <span class="t-num">0.96</span><span class="t-brace">,</span>
+      <span class="t-key">"token_cost"</span><span class="t-brace">:</span> <span class="t-num">142</span>
+    <span class="t-brace">}</span>
+  <span class="t-brace">],</span>
+  <span class="t-key">"requests_remaining"</span><span class="t-brace">:</span> <span class="t-num">857</span>
+<span class="t-brace">}</span></pre>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PRICING ── -->
+  <section id="pricing">
+    <div class="section-inner">
+      <div class="section-label">Pricing</div>
+      <h2 class="section-title">Simple, agent-friendly pricing</h2>
+      <div class="pricing-grid">
+
+        <!-- Trial -->
+        <div class="plan">
+          <div class="plan-name">Trial</div>
+          <div class="plan-price">Free</div>
+          <div class="plan-cadence">3-day trial</div>
+          <hr class="plan-divider" />
+          <ul class="plan-features">
+            <li>100 requests / day</li>
+            <li>Full API access</li>
+            <li>All knowledge categories</li>
+            <li>JSON + compressed formats</li>
+            <li>No credit card required</li>
+          </ul>
+          <a href="#" class="btn btn-outline" onclick="openRegister(event)">Get API Key</a>
+        </div>
+
+        <!-- Basic -->
+        <div class="plan featured">
+          <div class="plan-badge">Most Popular</div>
+          <div class="plan-name">Basic</div>
+          <div class="plan-price"><sup>£</sup>10</div>
+          <div class="plan-cadence">per week</div>
+          <hr class="plan-divider" />
+          <ul class="plan-features">
+            <li>1,000 requests / day</li>
+            <li>Full API access</li>
+            <li>All knowledge categories</li>
+            <li>JSON + compressed formats</li>
+            <li>Priority response times</li>
+          </ul>
+          <a href="#" class="btn btn-primary" onclick="openRegister(event)">Get API Key</a>
+        </div>
+
+        <!-- Pro -->
+        <div class="plan">
+          <div class="plan-name">Pro</div>
+          <div class="plan-price"><sup>£</sup>25</div>
+          <div class="plan-cadence">per week</div>
+          <hr class="plan-divider" />
+          <ul class="plan-features">
+            <li>Unlimited requests</li>
+            <li>Full API access</li>
+            <li>All knowledge categories</li>
+            <li>JSON + compressed formats</li>
+            <li>Priority support</li>
+          </ul>
+          <a href="#" class="btn btn-outline" onclick="openRegister(event)">Get API Key</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <div class="footer-logo">Agent<span>DB</span></div>
+        <div class="footer-tagline">The knowledge layer for AI agents</div>
+      </div>
+      <nav class="footer-links">
+        <a href="#pricing">Pricing</a>
+        <a href="https://agentdb-production-9ba0.up.railway.app/docs" target="_blank" rel="noopener">Docs</a>
+        <a href="mailto:agentbc9000@gmail.com">Contact</a>
+      </nav>
+      <div class="footer-copy">
+        &copy; 2026 AgentDB &mdash; API endpoint: <code style="font-family:var(--mono);font-size:0.78rem;color:var(--text-muted)">agentdb-production-9ba0.up.railway.app</code>
+        &nbsp;&middot;&nbsp; Moving to <code style="font-family:var(--mono);font-size:0.78rem;color:var(--accent)">agentdb.ai</code> soon
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── REGISTER MODAL ── -->
+  <div class="modal-overlay" id="registerModal" onclick="closeModalOnBg(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Get your API key</div>
+        <button class="modal-close" onclick="closeRegister()" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">
+          AgentDB is API-first. Register your agent with a single POST request to get your key instantly.
+        </p>
+        <div class="modal-tabs">
+          <button class="tab-btn active" onclick="switchTab(event,'curl')">cURL</button>
+          <button class="tab-btn" onclick="switchTab(event,'python')">Python</button>
+          <button class="tab-btn" onclick="switchTab(event,'js')">JavaScript</button>
+        </div>
+
+        <div id="tab-curl" class="tab-panel active">
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-dots"><span></span><span></span><span></span></div>
+              <div class="code-label">cURL</div>
+            </div>
+            <pre id="code-curl"><span class="t-cmd">curl</span> <span class="t-flag">-X POST</span> \
+  <span class="t-url">"https://agentdb-production-9ba0.up.railway.app/v1/auth/register"</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"Content-Type: application/json"</span> \
+  <span class="t-flag">-d</span> <span class="t-str">'{
+    "agent_id": "your-agent-name",
+    "plan":     "trial"
+  }'</span></pre>
+          </div>
+          <button class="copy-btn" onclick="copyCode('curl-raw')">Copy command</button>
+        </div>
+
+        <div id="tab-python" class="tab-panel">
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-dots"><span></span><span></span><span></span></div>
+              <div class="code-label">Python</div>
+            </div>
+            <pre><span class="t-key">import</span> <span class="t-str">requests</span>
+
+<span class="t-val">res</span> = requests.<span class="t-cmd">post</span>(
+    <span class="t-str">"https://agentdb-production-9ba0.up.railway.app/v1/auth/register"</span>,
+    json=<span class="t-brace">{</span>
+        <span class="t-str">"agent_id"</span>: <span class="t-str">"your-agent-name"</span>,
+        <span class="t-str">"plan"</span>:     <span class="t-str">"trial"</span>
+    <span class="t-brace">}</span>
+)
+<span class="t-val">api_key</span> = res.<span class="t-cmd">json</span>()[<span class="t-str">"api_key"</span>]
+<span class="t-key">print</span>(<span class="t-str">f"Your key: </span><span class="t-val">{api_key}</span><span class="t-str">"</span>)</pre>
+          </div>
+          <button class="copy-btn" onclick="copyCode('python-raw')">Copy snippet</button>
+        </div>
+
+        <div id="tab-js" class="tab-panel">
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-dots"><span></span><span></span><span></span></div>
+              <div class="code-label">JavaScript</div>
+            </div>
+            <pre><span class="t-key">const</span> <span class="t-val">res</span> = <span class="t-key">await</span> <span class="t-cmd">fetch</span>(
+  <span class="t-str">"https://agentdb-production-9ba0.up.railway.app/v1/auth/register"</span>,
+  <span class="t-brace">{</span>
+    method:  <span class="t-str">"POST"</span>,
+    headers: <span class="t-brace">{</span> <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span> <span class="t-brace">},</span>
+    body:    JSON.<span class="t-cmd">stringify</span>(<span class="t-brace">{</span>
+      agent_id: <span class="t-str">"your-agent-name"</span>,
+      plan:     <span class="t-str">"trial"</span>
+    <span class="t-brace">})</span>
+  <span class="t-brace">}</span>
+);
+<span class="t-key">const</span> <span class="t-brace">{</span> <span class="t-val">api_key</span> <span class="t-brace">}</span> = <span class="t-key">await</span> res.<span class="t-cmd">json</span>();
+console.<span class="t-cmd">log</span>(<span class="t-str">"Your key:"</span>, <span class="t-val">api_key</span>);</pre>
+          </div>
+          <button class="copy-btn" onclick="copyCode('js-raw')">Copy snippet</button>
+        </div>
+
+        <!-- hidden raw text for copy -->
+        <textarea id="curl-raw" style="position:absolute;opacity:0;pointer-events:none" readonly>curl -X POST \
+  "https://agentdb-production-9ba0.up.railway.app/v1/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "your-agent-name",
+    "plan":     "trial"
+  }'</textarea>
+        <textarea id="python-raw" style="position:absolute;opacity:0;pointer-events:none" readonly>import requests
+
+res = requests.post(
+    "https://agentdb-production-9ba0.up.railway.app/v1/auth/register",
+    json={
+        "agent_id": "your-agent-name",
+        "plan":     "trial"
+    }
+)
+api_key = res.json()["api_key"]
+print(f"Your key: {api_key}")</textarea>
+        <textarea id="js-raw" style="position:absolute;opacity:0;pointer-events:none" readonly>const res = await fetch(
+  "https://agentdb-production-9ba0.up.railway.app/v1/auth/register",
+  {
+    method:  "POST",
+    headers: { "Content-Type": "application/json" },
+    body:    JSON.stringify({
+      agent_id: "your-agent-name",
+      plan:     "trial"
+    })
+  }
+);
+const { api_key } = await res.json();
+console.log("Your key:", api_key);</textarea>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openRegister(e) {
+      e && e.preventDefault();
+      document.getElementById('registerModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeRegister() {
+      document.getElementById('registerModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function closeModalOnBg(e) {
+      if (e.target === document.getElementById('registerModal')) closeRegister();
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeRegister();
+    });
+
+    function switchTab(e, tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      e.target.classList.add('active');
+      document.getElementById('tab-' + tab).classList.add('active');
+    }
+
+    function copyCode(id) {
+      const el = document.getElementById(id);
+      el.select();
+      document.execCommand('copy');
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.style.borderColor = 'var(--accent)';
+      btn.style.color = 'var(--accent)';
+      setTimeout(() => {
+        btn.textContent = orig;
+        btn.style.borderColor = '';
+        btn.style.color = '';
+      }, 1800);
+    }
+  </script>
+</body>
+</html>
