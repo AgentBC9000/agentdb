@@ -195,8 +195,8 @@ async def ingest_item(
     Requires ?secret=<admin-secret> query parameter.
     Not accessible to regular API keys.
     """
-    if secret != settings.ADMIN_SECRET:
-        raise HTTPException(status_code=403, detail=f"Invalid admin secret (got: {repr(secret)}, expected len: {len(settings.ADMIN_SECRET)})")
+    if secret != settings.ADMIN_SECRET.strip():
+        raise HTTPException(status_code=403, detail="Invalid admin secret")
 
     item_id = str(uuid.uuid4())
 
