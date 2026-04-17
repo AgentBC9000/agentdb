@@ -15,7 +15,7 @@ INGEST_PATH = "/v1/knowledge/ingest"
 REQUEST_TIMEOUT = 30  # seconds
 
 
-def _get_config() -> Optional[tuple[str, str]]:
+def _get_config() -> Optional[tuple]:
     """
     Read required environment variables.
 
@@ -43,21 +43,28 @@ def _build_payload(item: dict) -> dict:
     """
     Map a summarised knowledge item to the AgentDB ingest request payload.
 
-    The schema mirrors the fields produced by summariser.summarise(), plus
-    the source metadata that run.py attaches.
+    Maps summariser output to the API's IngestRequest schema:
+      title, content_type, summary, body, tags, source_url, confidence
     """
-    return {
-        "title": item.get("title", ""),
-        "summary": item.get("summary", ""),
+    # Pack extra metadata into the body dict so nothing is lost
+    body = {
         "key_points": item.get("key_points", []),
-        "tags": item.get("tags", []),
-        "confidence": item.get("confidence", 0.5),
         "source_name": item.get("source_name", ""),
         "category": item.get("category", ""),
-        "content_type": item.get("content_type", ""),
-        # Optional enrichment fields — included when present
-        **({"url": item["url"]} if item.get("url") else {}),
-        **({"video_id": item["video_id"]} if item.get("video_id") else {}),
+    }
+    if item.get("video_id"):
+        body["video_id"] = item["video_id"]
+
+    return {
+        "title": item.get("title", ""),
+        "content_type": item.get("content_type", "blog_article"),
+        "summary": item.get("summary", ""),
+        "body": body,
+        "tags": item.get("tags", []),
+        "source_url": item.get("url") or None,
+        "confidence": item.get("confidence", 0.5),
+        "relevance_score": item.get("confidence", 0.5),  # use confidence as relevance too
+        "generate_embedding": False,  # no OpenAI key in scraper
     }
 
 
@@ -87,8 +94,8 @@ def ingest_item(item: dict) -> bool:
             response = client.post(
                 endpoint,
                 json=payload,
+                params={"secret": admin_secret},
                 headers={
-                    "Authorization": f"Bearer {admin_secret}",
                     "Content-Type": "application/json",
                     "User-Agent": "AgentDB-Scraper/1.0",
                 },

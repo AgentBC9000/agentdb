@@ -1,6 +1,6 @@
 """
 AgentDB Knowledge Scraper — Summariser
-Uses Claude claude-3-5-haiku-20241022 to compress raw content into structured knowledge.
+Uses Claude to compress raw content into structured knowledge.
 """
 
 import json
@@ -12,7 +12,7 @@ import anthropic
 
 logger = logging.getLogger(__name__)
 
-MODEL = "claude-3-5-haiku-20241022"
+MODEL = "claude-3-haiku-20240307"
 MAX_INPUT_CHARS = 80_000  # ~20k tokens; truncate beyond this to stay within context
 
 SYSTEM_PROMPT = """\
