@@ -8,7 +8,7 @@ import os
 import smtplib
 from datetime import datetime, timezone
 from email.mime.text import MIMEText
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 587
 
 
-def _get_config() -> dict | None:
+def _get_config() -> Optional[Dict]:
     """
     Read required environment variables for email sending.
 
@@ -46,7 +46,7 @@ def _get_config() -> dict | None:
     }
 
 
-def _build_report_body(results: list[dict[str, Any]]) -> str:
+def _build_report_body(results: List[Dict[str, Any]]) -> str:
     """
     Render the plain-text email body from the list of run results.
 
@@ -112,7 +112,7 @@ def _build_report_body(results: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-def send_report(results: list[dict[str, Any]]) -> bool:
+def send_report(results: List[Dict[str, Any]]) -> bool:
     """
     Send the run report email via Gmail SMTP.
 

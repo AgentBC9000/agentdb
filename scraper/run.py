@@ -15,7 +15,7 @@ Required environment variables:
 
 import logging
 import sys
-from typing import Any
+from typing import Any, Dict, List
 
 from blog_scraper import scrape_blog_source
 from ingest import ingest_item
@@ -209,7 +209,7 @@ def main() -> None:
     )
     logger.info("=" * 60)
 
-    all_results: list[dict[str, Any]] = []
+    all_results: List[Dict[str, Any]] = []
 
     # --- YouTube ---
     for source in YOUTUBE_SOURCES:
