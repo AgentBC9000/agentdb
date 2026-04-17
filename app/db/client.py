@@ -27,7 +27,8 @@ class AsyncDB:
         def replace(m):
             params.append(values[m.group(1)])
             return f"${len(params)}"
-        return re.sub(r":(\w+)", replace, query), params
+        # (?<!:) negative lookbehind — skip :: PostgreSQL type casts
+        return re.sub(r"(?<!:):(\w+)", replace, query), params
 
     async def fetch_one(self, query: str, values: dict = None):
         q, p = self._convert(query, values or {})
