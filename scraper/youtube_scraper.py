@@ -39,8 +39,11 @@ def get_recent_videos(channel_id: str, max_count: int = 3) -> list:
         List of dicts with keys ``video_id`` and ``title``.
     """
     url = RSS_FEED_URL.format(channel_id=channel_id)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; AgentDB-Scraper/1.0; +https://agentdb.ai)"
+    }
     try:
-        with httpx.Client(timeout=15) as client:
+        with httpx.Client(timeout=15, headers=headers) as client:
             response = client.get(url)
             response.raise_for_status()
     except httpx.HTTPError as exc:

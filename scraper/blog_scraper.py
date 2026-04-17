@@ -86,8 +86,8 @@ def get_latest_article(rss_url: str, source_name: str) -> Optional[dict]:
         return None
 
     entry = feed.entries[0]
-    title = entry.get("title", "").strip() or "Untitled"
-    url = entry.get("link", "").strip()
+    title = (entry.get("title") or "").strip() or "Untitled"
+    url = (entry.get("link") or entry.get("url") or "").strip()
 
     if not url:
         logger.warning("Latest entry for %s has no URL", source_name)
@@ -99,18 +99,20 @@ def get_latest_article(rss_url: str, source_name: str) -> Optional[dict]:
 
 def _is_noise_element(tag) -> bool:
     """Return True if a BS4 tag looks like navigation, ads, or other non-content."""
-    tag_name = tag.name or ""
-    if tag_name.lower() in _NOISE_TAGS:
-        return True
+    try:
+        tag_name = tag.name or ""
+        if tag_name.lower() in _NOISE_TAGS:
+            return True
 
-    for attr in ("class", "id", "role"):
-        values = tag.get(attr, [])
-        if isinstance(values, str):
-            values = [values]
-        for val in values:
-            if _NOISE_PATTERNS.search(val):
-                return True
-
+        for attr in ("class", "id", "role"):
+            values = tag.get(attr) or []
+            if isinstance(values, str):
+                values = [values]
+            for val in values:
+                if val and _NOISE_PATTERNS.search(val):
+                    return True
+    except Exception:
+        pass
     return False
 
 
