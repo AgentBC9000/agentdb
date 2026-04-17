@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException, Header
 from typing import Optional, List
 from pydantic import BaseModel
+import uuid
 
+from app.core.config import settings
 from app.core.dependencies import get_current_key
 from app.db.client import get_db
 from app.services.rate_limiter import check_rate_limit
@@ -9,15 +11,17 @@ from app.services.rate_limiter import check_rate_limit
 router = APIRouter()
 
 
+# ── Response models ───────────────────────────────────────────────────────────
+
 class KnowledgeItem(BaseModel):
     id: str
     title: str
     content_type: str
-    summary: Optional[str]
-    body: Optional[dict]
-    tags: Optional[List[str]]
-    confidence: Optional[float]
-    relevance_score: Optional[float]
+    summary: Optional[str] = None
+    body: Optional[dict] = None
+    tags: Optional[List[str]] = None
+    confidence: Optional[float] = None
+    relevance_score: Optional[float] = None
     published_at: str
 
 
@@ -28,77 +32,119 @@ class KnowledgeResponse(BaseModel):
     has_more: bool
 
 
+class IngestRequest(BaseModel):
+    title: str
+    content_type: str                  # "article", "video", "data", "research"
+    summary: Optional[str] = None
+    body: Optional[dict] = None        # Structured content
+    tags: Optional[List[str]] = None
+    source_url: Optional[str] = None
+    confidence: Optional[float] = 1.0
+    relevance_score: Optional[float] = 1.0
+    generate_embedding: bool = True    # Auto-generate vector embedding
+
+
+# ── Public endpoints (require API key) ───────────────────────────────────────
+
 @router.get("/latest", response_model=KnowledgeResponse)
 async def get_latest(
     limit: int = Query(20, ge=1, le=100),
     page: int = Query(1, ge=1),
-    tags: Optional[str] = Query(None),
+    tags: Optional[str] = Query(None, description="Comma-separated tags"),
     content_type: Optional[str] = Query(None),
     key_record=Depends(get_current_key),
     db=Depends(get_db),
 ):
+    """
+    Get the latest knowledge entries.
+    AI agents should poll this endpoint regularly for fresh data.
+    """
     await check_rate_limit(key_record)
 
-    tag_list = [t.strip() for t in tags.split(",")] if tags else None
     offset = (page - 1) * limit
+    params = {"limit": limit, "offset": offset}
 
-    query = """
-        SELECT id, title, content_type, summary, body, tags,
-               confidence, relevance_score, published_at
-        FROM knowledge
-        WHERE is_active = true
-    """
-    params = {}
-
-    if tag_list:
-        query += " AND tags && :tags"
-        params["tags"] = tag_list
+    conditions = ["is_active = true"]
 
     if content_type:
-        query += " AND content_type = :content_type"
+        conditions.append("content_type = :content_type")
         params["content_type"] = content_type
 
-    query += " ORDER BY published_at DESC LIMIT :limit OFFSET :offset"
-    params["limit"] = limit
-    params["offset"] = offset
+    # Tag filter uses PostgreSQL array overlap operator
+    if tags:
+        tag_list = [t.strip() for t in tags.split(",")]
+        conditions.append("tags && :tags")
+        params["tags"] = tag_list
 
-    rows = await db.fetch_all(query, params)
+    where = " AND ".join(conditions)
+
+    rows = await db.fetch_all(
+        f"""SELECT id::text, title, content_type, summary, body, tags,
+                   confidence, relevance_score, published_at::text
+            FROM knowledge
+            WHERE {where}
+            ORDER BY published_at DESC
+            LIMIT :limit OFFSET :offset""",
+        params
+    )
+
+    items = []
+    for r in rows:
+        item = dict(r)
+        item["id"] = str(item["id"])
+        if item.get("published_at"):
+            item["published_at"] = str(item["published_at"])
+        items.append(item)
 
     return KnowledgeResponse(
-        items=[dict(r) for r in rows],
-        total=len(rows),
+        items=items,
+        total=len(items),
         page=page,
-        has_more=len(rows) == limit
+        has_more=len(items) == limit
     )
 
 
-@router.get("/search")
+@router.get("/search", response_model=KnowledgeResponse)
 async def semantic_search(
-    q: str = Query(...),
+    q: str = Query(..., description="Natural language search query"),
     limit: int = Query(10, ge=1, le=50),
     key_record=Depends(get_current_key),
     db=Depends(get_db),
 ):
+    """
+    Semantic vector search across the knowledge base.
+    Pass a natural language query — returns most relevant entries.
+    Requires Pro tier.
+    """
+    from app.core.dependencies import require_pro
     await check_rate_limit(key_record)
 
     from app.services.embeddings import get_embedding
     embedding = await get_embedding(q)
+    embedding_str = "[" + ",".join(str(x) for x in embedding) + "]"
 
     rows = await db.fetch_all(
-        """
-        SELECT id, title, content_type, summary, body, tags,
-               confidence, relevance_score, published_at
-        FROM knowledge
-        WHERE is_active = true
-        ORDER BY embedding <=> :embedding
-        LIMIT :limit
-        """,
-        {"embedding": str(embedding), "limit": limit}
+        """SELECT id::text, title, content_type, summary, body, tags,
+                  confidence, relevance_score, published_at::text,
+                  1 - (embedding <=> :embedding::vector) AS similarity
+           FROM knowledge
+           WHERE is_active = true AND embedding IS NOT NULL
+           ORDER BY embedding <=> :embedding::vector
+           LIMIT :limit""",
+        {"embedding": embedding_str, "limit": limit}
     )
 
+    items = []
+    for r in rows:
+        item = dict(r)
+        item["id"] = str(item["id"])
+        if item.get("published_at"):
+            item["published_at"] = str(item["published_at"])
+        items.append(item)
+
     return KnowledgeResponse(
-        items=[dict(r) for r in rows],
-        total=len(rows),
+        items=items,
+        total=len(items),
         page=1,
         has_more=False
     )
@@ -110,22 +156,104 @@ async def get_item(
     key_record=Depends(get_current_key),
     db=Depends(get_db),
 ):
+    """Get a single knowledge entry by ID, including any associated media."""
     await check_rate_limit(key_record)
 
     row = await db.fetch_one(
-        "SELECT * FROM knowledge WHERE id = :id AND is_active = true",
+        """SELECT id::text, title, content_type, summary, body, tags,
+                  confidence, relevance_score, published_at::text,
+                  source_url, created_at::text
+           FROM knowledge WHERE id = :id AND is_active = true""",
         {"id": item_id}
     )
 
     if not row:
-        from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Item not found")
 
     media = await db.fetch_all(
-        "SELECT * FROM media WHERE knowledge_id = :id",
+        """SELECT id::text, file_name, file_type, r2_url,
+                  transcript_summary, created_at::text
+           FROM media WHERE knowledge_id = :id""",
         {"id": item_id}
     )
 
     result = dict(row)
     result["media"] = [dict(m) for m in media]
     return result
+
+
+# ── Admin ingest endpoint (requires ADMIN_SECRET header) ─────────────────────
+
+@router.post("/ingest", status_code=201)
+async def ingest_item(
+    payload: IngestRequest,
+    x_admin_secret: Optional[str] = Header(None, alias="x-admin-secret"),
+    db=Depends(get_db),
+):
+    """
+    Admin endpoint — ingest a new knowledge item.
+    Requires X-Admin-Secret header.
+    Not accessible to regular API keys.
+    """
+    if x_admin_secret != settings.ADMIN_SECRET:
+        raise HTTPException(status_code=403, detail="Invalid admin secret")
+
+    item_id = str(uuid.uuid4())
+
+    embedding = None
+    if payload.generate_embedding and payload.summary and settings.OPENAI_API_KEY:
+        try:
+            from app.services.embeddings import get_embedding
+            text = f"{payload.title}. {payload.summary}"
+            vec = await get_embedding(text)
+            embedding = "[" + ",".join(str(x) for x in vec) + "]"
+        except Exception:
+            pass  # Continue without embedding if it fails
+
+    if embedding:
+        await db.execute(
+            """INSERT INTO knowledge
+               (id, title, content_type, summary, body, tags,
+                source_url, confidence, relevance_score, embedding)
+               VALUES (:id, :title, :content_type, :summary, :body::jsonb,
+                       :tags, :source_url, :confidence, :relevance_score,
+                       :embedding::vector)""",
+            {
+                "id": item_id,
+                "title": payload.title,
+                "content_type": payload.content_type,
+                "summary": payload.summary,
+                "body": __import__("json").dumps(payload.body) if payload.body else None,
+                "tags": payload.tags or [],
+                "source_url": payload.source_url,
+                "confidence": payload.confidence,
+                "relevance_score": payload.relevance_score,
+                "embedding": embedding,
+            }
+        )
+    else:
+        await db.execute(
+            """INSERT INTO knowledge
+               (id, title, content_type, summary, body, tags,
+                source_url, confidence, relevance_score)
+               VALUES (:id, :title, :content_type, :summary, :body::jsonb,
+                       :tags, :source_url, :confidence, :relevance_score)""",
+            {
+                "id": item_id,
+                "title": payload.title,
+                "content_type": payload.content_type,
+                "summary": payload.summary,
+                "body": __import__("json").dumps(payload.body) if payload.body else None,
+                "tags": payload.tags or [],
+                "source_url": payload.source_url,
+                "confidence": payload.confidence,
+                "relevance_score": payload.relevance_score,
+            }
+        )
+
+    return {
+        "id": item_id,
+        "title": payload.title,
+        "embedding_generated": embedding is not None,
+        "message": "Knowledge item ingested successfully."
+    }

@@ -1,12 +1,13 @@
 from fastapi import HTTPException
 import redis.asyncio as redis
 from app.core.config import settings
+from app.models.api_key import APIKeyTier
 
 RATE_LIMITS = {
-    "trial": 100,
-    "basic": 1000,
-    "pro":   99999,
-    "fleet": 99999,
+    APIKeyTier.TRIAL: settings.RATE_LIMIT_TRIAL,   # 100/day
+    APIKeyTier.BASIC: settings.RATE_LIMIT_BASIC,   # 1000/day
+    APIKeyTier.PRO:   settings.RATE_LIMIT_PRO,     # unlimited
+    APIKeyTier.FLEET: settings.RATE_LIMIT_PRO,
 }
 
 _redis = None
@@ -20,24 +21,34 @@ async def get_redis():
 
 
 async def check_rate_limit(key_record: dict):
+    """
+    Check and increment rate limit for the given API key.
+    Uses Redis with a daily TTL window.
+    If Redis is unavailable, fails open (allows the request).
+    """
     tier = key_record["tier"]
     limit = RATE_LIMITS.get(tier, 100)
 
     if limit >= 99999:
-        return
+        return  # Unlimited tier
 
-    r = await get_redis()
-    import datetime
-    redis_key = f"ratelimit:{key_record['id']}:{datetime.date.today()}"
+    try:
+        r = await get_redis()
+        redis_key = f"ratelimit:{key_record['id']}:{__import__('datetime').date.today()}"
 
-    current = await r.incr(redis_key)
+        current = await r.incr(redis_key)
 
-    if current == 1:
-        await r.expire(redis_key, 86400)
+        if current == 1:
+            await r.expire(redis_key, 86400)
 
-    if current > limit:
-        raise HTTPException(
-            status_code=429,
-            detail=f"Daily rate limit reached ({limit} requests). Upgrade at https://agentdb.ai/pricing",
-            headers={"X-RateLimit-Limit": str(limit), "X-RateLimit-Remaining": "0"}
-        )
+        if current > limit:
+            raise HTTPException(
+                status_code=429,
+                detail=f"Daily rate limit reached ({limit} requests). Resets at midnight UTC. Upgrade at https://agentdb.ai/pricing",
+                headers={"X-RateLimit-Limit": str(limit), "X-RateLimit-Remaining": "0"}
+            )
+    except HTTPException:
+        raise
+    except Exception:
+        # Redis unavailable — fail open, don't block the request
+        pass
