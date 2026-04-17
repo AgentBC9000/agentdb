@@ -5,12 +5,15 @@ from contextlib import asynccontextmanager
 
 from app.api.v1 import router as api_v1_router
 from app.core.config import settings
+from app.db.client import connect_db, disconnect_db
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    await connect_db()
     print(f"🚀 AgentDB API starting — env: {settings.ENVIRONMENT}")
     yield
+    await disconnect_db()
     print("AgentDB API shutting down")
 
 
