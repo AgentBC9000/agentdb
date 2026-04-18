@@ -20,6 +20,7 @@ import os
 import sys
 import argparse
 from datetime import datetime, timezone
+from typing import Optional
 
 try:
     import httpx
@@ -44,7 +45,7 @@ def register() -> str:
     return key
 
 
-def fetch_latest(key: str, limit: int, tags: str | None, content_type: str | None) -> list:
+def fetch_latest(key: str, limit: int, tags: Optional[str], content_type: Optional[str]) -> list:
     params: dict = {"limit": limit}
     if tags:
         params["tags"] = tags
@@ -67,7 +68,7 @@ def fetch_latest(key: str, limit: int, tags: str | None, content_type: str | Non
     return resp.json()["items"]
 
 
-def print_briefing(items: list, tags: str | None, content_type: str | None) -> None:
+def print_briefing(items: list, tags: Optional[str], content_type: Optional[str]) -> None:
     now = datetime.now(timezone.utc).strftime("%A, %B %-d %Y")
 
     print()
