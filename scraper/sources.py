@@ -44,6 +44,11 @@ YOUTUBE_SOURCES = [
         "channel_id": "UCeDZCa3VrRQvzBlVR-oVVmA",
         "category": "philosophy_science",
     },
+    {
+        "name": "Prof G Markets",
+        "channel_id": "UCp4CBeq4nzeg9smAvdjPrig",
+        "category": "market_news",
+    },
 ]
 
 BLOG_SOURCES = [
