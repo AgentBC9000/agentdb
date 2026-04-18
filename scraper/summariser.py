@@ -12,7 +12,7 @@ import anthropic
 
 logger = logging.getLogger(__name__)
 
-MODEL = "claude-3-haiku-20240307"
+MODEL = "claude-opus-4-5"
 MAX_INPUT_CHARS = 80_000  # ~20k tokens; truncate beyond this to stay within context
 
 SYSTEM_PROMPT = """\

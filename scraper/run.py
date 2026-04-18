@@ -77,7 +77,7 @@ def _process_youtube_source(source: dict) -> dict[str, Any]:
         knowledge = summarise(
             title=scraped["title"],
             text=scraped["transcript"],
-            content_type="youtube_transcript",
+            content_type="video",
             source_name=name,
             category=category,
         )
@@ -154,7 +154,7 @@ def _process_blog_source(source: dict) -> dict[str, Any]:
         knowledge = summarise(
             title=scraped["title"],
             text=scraped["text"],
-            content_type="blog_article",
+            content_type="article",
             source_name=name,
             category=category,
         )
