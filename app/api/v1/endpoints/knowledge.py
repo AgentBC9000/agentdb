@@ -45,6 +45,42 @@ class IngestRequest(BaseModel):
     generate_embedding: bool = True    # Auto-generate vector embedding
 
 
+# ── Sources manifest (public — no API key required) ──────────────────────────
+
+_SOURCES = {
+    "youtube": [
+        {"name": "Bloomberg",        "category": "market_news",              "url": "https://youtube.com/channel/UCIALMKvObZNtJ6AmdCLP7Lg"},
+        {"name": "CNBC",             "category": "market_news",              "url": "https://youtube.com/channel/UCrp_UI8XtuYfpiqluWLD7Lw"},
+        {"name": "Reuters",          "category": "market_news",              "url": "https://youtube.com/channel/UChqUTb7kYRX8-EiaN3XFrSQ"},
+        {"name": "Prof G Markets",   "category": "market_news",              "url": "https://youtube.com/channel/UCp4CBeq4nzeg9smAvdjPrig"},
+        {"name": "Rebel Capitalist", "category": "market_news_alternative",  "url": "https://youtube.com/channel/UCNjyEXSvYUUCzagFAKmaJ1Q"},
+        {"name": "Lex Fridman",      "category": "technology_ai",            "url": "https://youtube.com/channel/UCSHZKyawb77ixDdsGog4iWA"},
+        {"name": "Y Combinator",     "category": "startups_technology",      "url": "https://youtube.com/channel/UCcefcZRL2oaA_uBNeo5UOWg"},
+        {"name": "Closer To Truth",  "category": "philosophy_science",       "url": "https://youtube.com/channel/UCl9StMQ79LtEvlrskzjoYbQ"},
+        {"name": "Bernardo Kastrup", "category": "philosophy_science",       "url": "https://youtube.com/channel/UCeDZCa3VrRQvzBlVR-oVVmA"},
+    ],
+    "blogs": [
+        {"name": "Hacker News",       "category": "technology_startups",      "url": "https://news.ycombinator.com"},
+        {"name": "Ars Technica",      "category": "technology_science",       "url": "https://arstechnica.com"},
+        {"name": "Quanta Magazine",   "category": "science_research",         "url": "https://quantamagazine.org"},
+        {"name": "Marginal Revolution","category": "economics_policy",        "url": "https://marginalrevolution.com"},
+        {"name": "Zero Hedge",        "category": "market_news_alternative",  "url": "https://zerohedge.com"},
+    ],
+    "schedule": "Mon / Wed / Fri at 07:00 UTC",
+    "total_sources": 14,
+}
+
+
+@router.get("/sources")
+async def get_sources():
+    """
+    Returns the full list of content sources AgentDB ingests.
+    No API key required — use this to verify data provenance before subscribing.
+    Updated Mon/Wed/Fri at 07:00 UTC.
+    """
+    return _SOURCES
+
+
 # ── Public endpoints (require API key) ───────────────────────────────────────
 
 @router.get("/latest", response_model=KnowledgeResponse)
