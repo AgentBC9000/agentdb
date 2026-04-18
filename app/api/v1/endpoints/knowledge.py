@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query, HTTPException, Header
 from typing import Optional, List
 from pydantic import BaseModel
 import uuid
+import json
 
 from app.core.config import settings
 from app.core.dependencies import get_current_key
@@ -94,6 +95,11 @@ async def get_latest(
         item["id"] = str(item["id"])
         if item.get("published_at"):
             item["published_at"] = str(item["published_at"])
+        if isinstance(item.get("body"), str):
+            try:
+                item["body"] = json.loads(item["body"])
+            except (ValueError, TypeError):
+                item["body"] = None
         items.append(item)
 
     return KnowledgeResponse(
@@ -140,6 +146,11 @@ async def semantic_search(
         item["id"] = str(item["id"])
         if item.get("published_at"):
             item["published_at"] = str(item["published_at"])
+        if isinstance(item.get("body"), str):
+            try:
+                item["body"] = json.loads(item["body"])
+            except (ValueError, TypeError):
+                item["body"] = None
         items.append(item)
 
     return KnowledgeResponse(
