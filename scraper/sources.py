@@ -53,9 +53,9 @@ BLOG_SOURCES = [
         "category": "market_news_alternative",
     },
     {
-        "name": "Astral Codex Ten",
-        "rss_url": "https://astralcodexten.substack.com/feed",
-        "category": "rationalism_science",
+        "name": "Marginal Revolution",
+        "rss_url": "https://marginalrevolution.com/feed",
+        "category": "economics_policy",
     },
     {
         "name": "Quanta Magazine",
@@ -63,9 +63,9 @@ BLOG_SOURCES = [
         "category": "science_research",
     },
     {
-        "name": "McKinsey Insights",
-        "rss_url": "https://www.mckinsey.com/feeds/rss/latest-thinking",
-        "category": "business_strategy",
+        "name": "Ars Technica",
+        "rss_url": "https://feeds.arstechnica.com/arstechnica/index",
+        "category": "technology_science",
     },
     {
         "name": "Hacker News",
