@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 import uuid
 
+from app.core.config import settings
 from app.core.security import generate_api_key, get_trial_expiry
 from app.db.client import get_db
 from app.core.dependencies import get_current_key
@@ -54,6 +55,34 @@ async def register(payload: RegisterRequest, db=Depends(get_db)):
         trial_expires_at=trial_expiry.isoformat(),
         message="Welcome to AgentDB. Your 3-day trial has started. Store your API key securely."
     )
+
+
+@router.post("/admin/upgrade-key")
+async def upgrade_key(
+    key_prefix: str = Query(..., description="Key prefix to upgrade"),
+    tier: str = Query("pro", description="Target tier: trial, pro, fleet"),
+    secret: Optional[str] = Query(None),
+    db=Depends(get_db),
+):
+    """Admin endpoint — upgrade an API key's tier."""
+    if secret != settings.ADMIN_SECRET.strip():
+        raise HTTPException(status_code=403, detail="Invalid admin secret")
+
+    if tier not in ("trial", "pro", "fleet"):
+        raise HTTPException(status_code=400, detail="Invalid tier")
+
+    row = await db.fetch_one(
+        "SELECT key_prefix, tier FROM api_keys WHERE key_prefix = :prefix",
+        {"prefix": key_prefix},
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Key not found")
+
+    await db.execute(
+        "UPDATE api_keys SET tier = :tier, trial_expires_at = NULL WHERE key_prefix = :prefix",
+        {"tier": tier, "prefix": key_prefix},
+    )
+    return {"key_prefix": key_prefix, "tier": tier, "message": f"Key upgraded to {tier}"}
 
 
 @router.get("/me")
