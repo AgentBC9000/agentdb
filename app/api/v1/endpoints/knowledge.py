@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, HTTPException, Header
+from fastapi import APIRouter, Depends, Query, HTTPException, Header, Request
 from typing import Optional, List
 from pydantic import BaseModel
 import uuid
@@ -7,7 +7,7 @@ import json
 from app.core.config import settings
 from app.core.dependencies import get_current_key
 from app.db.client import get_db
-from app.services.rate_limiter import check_rate_limit
+from app.services.rate_limiter import check_rate_limit, check_demo_rate_limit
 
 router = APIRouter()
 
@@ -79,6 +79,53 @@ async def get_sources():
     Updated Mon/Wed/Fri at 07:00 UTC.
     """
     return _SOURCES
+
+
+# ── Public demo endpoint (no API key, IP rate-limited) ───────────────────────
+
+@router.get("/demo")
+async def get_demo(request: Request, db=Depends(get_db)):
+    """
+    Try AgentDB without signing up.
+    Returns the 5 latest knowledge items. No API key required.
+    Rate limited to 10 requests/hour per IP.
+
+    Ready for more? Register free:
+      curl -X POST https://agentdb-production-9ba0.up.railway.app/v1/auth/register \\
+           -H "Content-Type: application/json" -d '{}'
+    """
+    remaining = await check_demo_rate_limit(request)
+
+    rows = await db.fetch_all(
+        """SELECT id::text, title, content_type, summary, body, tags,
+                  confidence, relevance_score, published_at::text
+           FROM knowledge
+           WHERE is_active = true
+           ORDER BY published_at DESC
+           LIMIT 5"""
+    )
+
+    items = []
+    for r in rows:
+        item = dict(r)
+        item["id"] = str(item["id"])
+        if item.get("published_at"):
+            item["published_at"] = str(item["published_at"])
+        if isinstance(item.get("body"), str):
+            try:
+                item["body"] = json.loads(item["body"])
+            except (ValueError, TypeError):
+                item["body"] = None
+        items.append(item)
+
+    return {
+        "items": items,
+        "total": len(items),
+        "demo": True,
+        "requests_remaining_this_hour": remaining,
+        "register": "https://agentdb-production-9ba0.up.railway.app/v1/auth/register",
+        "message": "Free trial gives you 100 requests/day. Register at the link above.",
+    }
 
 
 # ── Public endpoints (require API key) ───────────────────────────────────────
