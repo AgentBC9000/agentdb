@@ -85,6 +85,38 @@ async def upgrade_key(
     return {"key_prefix": key_prefix, "tier": tier, "message": f"Key upgraded to {tier}"}
 
 
+@router.get("/admin/stats")
+async def get_stats(
+    secret: Optional[str] = Query(None),
+    db=Depends(get_db),
+):
+    """Admin endpoint — subscriber counts and usage stats."""
+    if secret != settings.ADMIN_SECRET.strip():
+        raise HTTPException(status_code=403, detail="Invalid admin secret")
+
+    tiers = await db.fetch_all(
+        """SELECT tier, COUNT(*) as count, SUM(requests_total) as total_requests
+           FROM api_keys WHERE is_active = true GROUP BY tier ORDER BY tier"""
+    )
+
+    recent = await db.fetch_all(
+        """SELECT key_prefix, tier, requests_today, requests_total, last_used_at::text
+           FROM api_keys WHERE is_active = true
+           ORDER BY last_used_at DESC NULLS LAST LIMIT 10"""
+    )
+
+    knowledge_count = await db.fetch_one(
+        "SELECT COUNT(*) as count FROM knowledge WHERE is_active = true"
+    )
+
+    return {
+        "subscribers": {row["tier"]: {"count": row["count"], "total_requests": row["total_requests"] or 0} for row in tiers},
+        "total_subscribers": sum(row["count"] for row in tiers),
+        "total_knowledge_items": knowledge_count["count"],
+        "recent_users": [dict(r) for r in recent],
+    }
+
+
 @router.get("/me")
 async def get_me(key_record=Depends(get_current_key)):
     return {
