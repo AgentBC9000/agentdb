@@ -66,10 +66,10 @@ PODCAST_SOURCES = [
     },
     {
         "name": "Dwarkesh Podcast",
-        "rss_url": "https://www.dwarkeshpatel.com/feed.xml",
+        "rss_url": "https://api.substack.com/feed/podcast/69345.rss",
         "category": "technology_ai",
         "hosts": ["Dwarkesh Patel"],
-        # Dwarkesh posts transcripts on Substack
+        # Dwarkesh posts transcripts on Substack (dwarkesh.com)
         "transcript_selectors": [
             "div.body.markup",
             "div.available-content",
@@ -78,7 +78,7 @@ PODCAST_SOURCES = [
     },
     {
         "name": "Acquired",
-        "rss_url": "https://acquired.fm/rss",
+        "rss_url": "https://feeds.transistor.fm/acquired",
         "category": "startups_technology",
         "hosts": ["Ben Gilbert", "David Rosenthal"],
         # Acquired posts detailed show notes
@@ -91,7 +91,7 @@ PODCAST_SOURCES = [
     },
     {
         "name": "Sean Carroll's Mindscape",
-        "rss_url": "https://www.preposterousuniverse.com/podcast/feed/",
+        "rss_url": "https://rss.art19.com/sean-carrolls-mindscape",
         "category": "philosophy_science",
         "hosts": ["Sean Carroll"],
         # Sean posts blog posts with show notes for each episode
@@ -102,7 +102,7 @@ PODCAST_SOURCES = [
     },
     {
         "name": "Hard Fork",
-        "rss_url": "https://feeds.simplecast.com/l44ghJ2F",
+        "rss_url": "https://feeds.simplecast.com/l2i9YnTd",
         "category": "technology_science",
         "hosts": ["Kevin Roose", "Casey Newton"],
         # NYT — show notes only, no transcript
@@ -110,7 +110,7 @@ PODCAST_SOURCES = [
     },
     {
         "name": "All-In Podcast",
-        "rss_url": "https://feeds.megaphone.fm/allinthepodcast",
+        "rss_url": "https://allinchamathjason.libsyn.com/rss",
         "category": "market_news",
         "hosts": ["Chamath Palihapitiya", "Jason Calacanis", "David Sacks", "David Friedberg"],
         "transcript_selectors": [],

@@ -185,7 +185,7 @@ def summarise(
     result = _validate_result(parsed)
 
     # guests (podcast only)
-    guests = data.get("guests", [])
+    guests = parsed.get("guests", [])
     result["guests"] = [str(g).strip() for g in guests if g] if isinstance(guests, list) else []
 
     # Attach metadata that the ingest step will need
