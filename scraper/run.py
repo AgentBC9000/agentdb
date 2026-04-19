@@ -19,8 +19,9 @@ from typing import Any, Dict, List
 
 from blog_scraper import scrape_blog_source
 from ingest import ingest_item
+from podcast_scraper import scrape_podcast_source
 from reporter import send_report
-from sources import BLOG_SOURCES, YOUTUBE_SOURCES
+from sources import BLOG_SOURCES, PODCAST_SOURCES, YOUTUBE_SOURCES
 from summariser import summarise
 from youtube_scraper import scrape_youtube_source
 
@@ -194,6 +195,87 @@ def _process_blog_source(source: dict) -> dict[str, Any]:
     return result
 
 
+def _process_podcast_source(source: dict) -> dict[str, Any]:
+    """
+    Scrape → summarise → ingest one podcast source.
+    Returns a result dict suitable for the email report.
+    """
+    name = source["name"]
+    category = source["category"]
+    hosts = source.get("hosts", [])
+
+    result: dict[str, Any] = {
+        "source_name": name,
+        "content_type": "podcast",
+        "success": False,
+    }
+
+    # 1. Scrape
+    logger.info("[Podcast] Processing: %s", name)
+    try:
+        scraped = scrape_podcast_source(source)
+    except Exception as exc:
+        logger.error("[Podcast] Unhandled error scraping %s: %s", name, exc)
+        result["error"] = f"Scrape exception: {exc}"
+        return result
+
+    if scraped is None:
+        result["error"] = "No episode content available"
+        logger.warning("[Podcast] Skipping %s — no data", name)
+        return result
+
+    # 2. Summarise
+    try:
+        knowledge = summarise(
+            title=scraped["title"],
+            text=scraped["text"],
+            content_type="podcast",
+            source_name=name,
+            category=category,
+        )
+    except Exception as exc:
+        logger.error("[Podcast] Unhandled error summarising %s: %s", name, exc)
+        result["error"] = f"Summarise exception: {exc}"
+        return result
+
+    if knowledge is None:
+        result["error"] = "Claude summarisation returned no result"
+        logger.warning("[Podcast] Skipping %s — summarisation failed", name)
+        return result
+
+    # Attach podcast-specific metadata to body
+    knowledge["url"] = scraped.get("url", "")
+    knowledge["body"] = knowledge.get("body") or {}
+    if isinstance(knowledge["body"], dict):
+        knowledge["body"]["hosts"] = hosts
+        knowledge["body"]["guests"] = knowledge.pop("guests", [])
+        knowledge["body"]["audio_url"] = scraped.get("audio_url", "")
+        knowledge["body"]["source_name"] = name
+
+    # 3. Ingest
+    try:
+        ok = ingest_item(knowledge)
+    except Exception as exc:
+        logger.error("[Podcast] Unhandled error ingesting %s: %s", name, exc)
+        result["error"] = f"Ingest exception: {exc}"
+        return result
+
+    if not ok:
+        result["error"] = "AgentDB ingest rejected the item (check logs above)"
+        return result
+
+    result.update(
+        {
+            "success": True,
+            "title": knowledge["title"],
+            "url": scraped.get("url", ""),
+            "tags": knowledge.get("tags", []),
+            "confidence": knowledge.get("confidence"),
+        }
+    )
+    return result
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -203,9 +285,10 @@ def main() -> None:
     logger.info("=" * 60)
     logger.info("AgentDB Knowledge Scraper — starting run")
     logger.info(
-        "Sources: %d YouTube channels, %d blogs",
+        "Sources: %d YouTube channels, %d blogs, %d podcasts",
         len(YOUTUBE_SOURCES),
         len(BLOG_SOURCES),
+        len(PODCAST_SOURCES),
     )
     logger.info("=" * 60)
 
@@ -217,6 +300,13 @@ def main() -> None:
         all_results.append(result)
         status = "OK" if result["success"] else f"FAIL ({result.get('error', '?')})"
         logger.info("[YouTube] %s → %s", source["name"], status)
+
+    # --- Podcasts ---
+    for source in PODCAST_SOURCES:
+        result = _process_podcast_source(source)
+        all_results.append(result)
+        status = "OK" if result["success"] else f"FAIL ({result.get('error', '?')})"
+        logger.info("[Podcast] %s → %s", source["name"], status)
 
     # --- Blogs ---
     for source in BLOG_SOURCES:

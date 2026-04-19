@@ -35,7 +35,7 @@ class KnowledgeResponse(BaseModel):
 
 class IngestRequest(BaseModel):
     title: str
-    content_type: str                  # "article", "video", "data", "research"
+    content_type: str                  # "article", "video", "data", "research", "podcast"
     summary: Optional[str] = None
     body: Optional[dict] = None        # Structured content
     tags: Optional[List[str]] = None

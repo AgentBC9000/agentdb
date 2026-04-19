@@ -32,6 +32,8 @@ The JSON object must have exactly these fields:
 - "confidence": float between 0.0 and 1.0 — your confidence that the content is substantive \
   and the extraction is accurate (lower if transcript is garbled, article is paywalled/stub, \
   or content is low-signal)
+- "guests": array of strings — for podcasts only, list any notable guests mentioned. \
+  Empty array for non-podcast content.
 
 Be concise but information-rich. Avoid filler phrases. Prioritise facts, data, and novel \
 insights over generic observations.\
@@ -181,6 +183,10 @@ def summarise(
         return None
 
     result = _validate_result(parsed)
+
+    # guests (podcast only)
+    guests = data.get("guests", [])
+    result["guests"] = [str(g).strip() for g in guests if g] if isinstance(guests, list) else []
 
     # Attach metadata that the ingest step will need
     result["source_name"] = source_name

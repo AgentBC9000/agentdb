@@ -85,6 +85,35 @@ async def upgrade_key(
     return {"key_prefix": key_prefix, "tier": tier, "message": f"Key upgraded to {tier}"}
 
 
+@router.post("/admin/migrate")
+async def run_migration(
+    secret: Optional[str] = Query(None),
+    db=Depends(get_db),
+):
+    """Admin endpoint — run pending DB migrations."""
+    if secret != settings.ADMIN_SECRET.strip():
+        raise HTTPException(status_code=403, detail="Invalid admin secret")
+
+    migrations = []
+
+    # Add podcast to content_type CHECK constraint
+    try:
+        await db.execute("""
+            ALTER TABLE knowledge
+            DROP CONSTRAINT IF EXISTS knowledge_content_type_check
+        """)
+        await db.execute("""
+            ALTER TABLE knowledge
+            ADD CONSTRAINT knowledge_content_type_check
+            CHECK (content_type IN ('article', 'video', 'data', 'research', 'podcast'))
+        """)
+        migrations.append("✅ Added 'podcast' to content_type constraint")
+    except Exception as exc:
+        migrations.append(f"⚠️ content_type constraint: {exc}")
+
+    return {"migrations": migrations}
+
+
 @router.get("/admin/stats")
 async def get_stats(
     secret: Optional[str] = Query(None),

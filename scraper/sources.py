@@ -51,6 +51,72 @@ YOUTUBE_SOURCES = [
     },
 ]
 
+PODCAST_SOURCES = [
+    {
+        "name": "Lex Fridman Podcast",
+        "rss_url": "https://lexfridman.com/feed/podcast/",
+        "category": "technology_ai",
+        "hosts": ["Lex Fridman"],
+        # Lex posts full transcripts on his site
+        "transcript_selectors": [
+            "div.transcript",
+            "div.entry-content",
+            "article .post-content",
+        ],
+    },
+    {
+        "name": "Dwarkesh Podcast",
+        "rss_url": "https://www.dwarkeshpatel.com/feed.xml",
+        "category": "technology_ai",
+        "hosts": ["Dwarkesh Patel"],
+        # Dwarkesh posts transcripts on Substack
+        "transcript_selectors": [
+            "div.body.markup",
+            "div.available-content",
+            "article",
+        ],
+    },
+    {
+        "name": "Acquired",
+        "rss_url": "https://acquired.fm/rss",
+        "category": "startups_technology",
+        "hosts": ["Ben Gilbert", "David Rosenthal"],
+        # Acquired posts detailed show notes
+        "transcript_selectors": [
+            "div.show-notes",
+            "div.episode-notes",
+            "article .content",
+            "div.post-content",
+        ],
+    },
+    {
+        "name": "Sean Carroll's Mindscape",
+        "rss_url": "https://www.preposterousuniverse.com/podcast/feed/",
+        "category": "philosophy_science",
+        "hosts": ["Sean Carroll"],
+        # Sean posts blog posts with show notes for each episode
+        "transcript_selectors": [
+            "div.entry-content",
+            "article .post-content",
+        ],
+    },
+    {
+        "name": "Hard Fork",
+        "rss_url": "https://feeds.simplecast.com/l44ghJ2F",
+        "category": "technology_science",
+        "hosts": ["Kevin Roose", "Casey Newton"],
+        # NYT — show notes only, no transcript
+        "transcript_selectors": [],
+    },
+    {
+        "name": "All-In Podcast",
+        "rss_url": "https://feeds.megaphone.fm/allinthepodcast",
+        "category": "market_news",
+        "hosts": ["Chamath Palihapitiya", "Jason Calacanis", "David Sacks", "David Friedberg"],
+        "transcript_selectors": [],
+    },
+]
+
 BLOG_SOURCES = [
     {
         "name": "Zero Hedge",
