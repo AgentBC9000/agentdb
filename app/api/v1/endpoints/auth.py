@@ -96,20 +96,12 @@ async def run_migration(
 
     migrations = []
 
-    # Add podcast to content_type CHECK constraint
+    # Add podcast to content_type ENUM
     try:
-        await db.execute("""
-            ALTER TABLE knowledge
-            DROP CONSTRAINT IF EXISTS knowledge_content_type_check
-        """)
-        await db.execute("""
-            ALTER TABLE knowledge
-            ADD CONSTRAINT knowledge_content_type_check
-            CHECK (content_type IN ('article', 'video', 'data', 'research', 'podcast'))
-        """)
-        migrations.append("✅ Added 'podcast' to content_type constraint")
+        await db.execute("ALTER TYPE content_type ADD VALUE IF NOT EXISTS 'podcast'")
+        migrations.append("✅ Added 'podcast' to content_type enum")
     except Exception as exc:
-        migrations.append(f"⚠️ content_type constraint: {exc}")
+        migrations.append(f"⚠️ content_type enum: {exc}")
 
     return {"migrations": migrations}
 
