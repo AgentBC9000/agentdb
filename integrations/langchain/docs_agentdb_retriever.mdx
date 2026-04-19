@@ -1,0 +1,150 @@
+# AgentDB
+
+>[AgentDB](https://agentdb.dev) is a real-time curated knowledge API for AI agents.
+>It ingests YouTube channels, podcasts, and blogs on a Mon/Wed/Fri schedule,
+>summarises each item with Claude, and exposes the results via a structured REST API
+>with optional semantic vector search.
+
+## Overview
+
+### Integration details
+
+| Class | Package | Local | Serialisable | JS support |
+| :--- | :--- | :---: | :---: | :---: |
+| [AgentDBRetriever](https://api.python.langchain.com/en/latest/retrievers/langchain_community.retrievers.agentdb.AgentDBRetriever.html) | [langchain_community](https://api.python.langchain.com/en/latest/community_api_reference.html) | ❌ | ❌ | ❌ |
+
+## Setup
+
+Sign up for a free API key at [agentdb.dev](https://agentdb.dev):
+
+```bash
+curl -X POST https://agentdb-production-9ba0.up.railway.app/v1/auth/register \
+     -H "Content-Type: application/json" -d '{}'
+```
+
+Set your API key as an environment variable:
+
+```bash
+export AGENTDB_API_KEY="agentdb-..."
+```
+
+### Installation
+
+```bash
+pip install -U langchain-community httpx
+```
+
+## Instantiation
+
+`AgentDBRetriever` supports two modes:
+
+- **`search`** (default) — semantic vector search. Pass a natural language query and get the most relevant items across the knowledge base. Requires a Pro tier key.
+- **`latest`** — returns the newest items, optionally filtered by `content_type` or `tags`. Query string is ignored.
+
+```python
+from langchain_community.retrievers import AgentDBRetriever
+
+# Semantic search (default)
+retriever = AgentDBRetriever(
+    api_key="agentdb-...",   # or set AGENTDB_API_KEY
+    mode="search",
+    k=10,
+)
+
+# Latest items with filters
+retriever = AgentDBRetriever(
+    mode="latest",
+    k=20,
+    content_type="podcast",       # "article" | "video" | "podcast" | "data" | "research"
+    tags="ai,machine-learning",   # comma-separated, any-match
+    min_confidence=0.7,           # exclude low-quality items
+)
+```
+
+## Usage
+
+```python
+docs = retriever.invoke("AI safety developments this week")
+
+for doc in docs:
+    print(doc.metadata["title"])
+    print(doc.metadata["published_at"])
+    print(doc.page_content[:300])
+    print("---")
+```
+
+Each returned `Document` contains:
+
+| Field | Location | Description |
+| :--- | :--- | :--- |
+| `page_content` | `doc.page_content` | 2-3 paragraph summary + key bullet points |
+| `id` | `doc.metadata["id"]` | UUID of the knowledge item |
+| `title` | `doc.metadata["title"]` | Clean title (may differ slightly from source) |
+| `content_type` | `doc.metadata["content_type"]` | `article`, `video`, `podcast`, `data`, or `research` |
+| `tags` | `doc.metadata["tags"]` | List of topic tags |
+| `confidence` | `doc.metadata["confidence"]` | Claude's confidence score (0.0–1.0) |
+| `published_at` | `doc.metadata["published_at"]` | ISO timestamp |
+| `source_url` | `doc.metadata["source_url"]` | Original source URL |
+| `key_points` | `doc.metadata["key_points"]` | List of 5-10 concrete takeaways |
+
+## Use within a chain
+
+```python
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_openai import ChatOpenAI
+
+
+def format_docs(docs):
+    return "\n\n".join(
+        f"**{d.metadata['title']}** ({d.metadata['published_at'][:10]})\n{d.page_content}"
+        for d in docs
+    )
+
+
+llm = ChatOpenAI(model="gpt-4o-mini")
+retriever = AgentDBRetriever(k=5)
+
+prompt = ChatPromptTemplate.from_template(
+    "You are a research assistant. Use the knowledge below to answer the question.\n\n"
+    "Recent knowledge:\n{context}\n\n"
+    "Question: {question}"
+)
+
+chain = (
+    {"context": retriever | format_docs, "question": RunnablePassthrough()}
+    | prompt
+    | llm
+    | StrOutputParser()
+)
+
+answer = chain.invoke("What are the biggest AI developments this week?")
+print(answer)
+```
+
+## Async usage
+
+`AgentDBRetriever` supports async natively:
+
+```python
+docs = await retriever.ainvoke("latest breakthroughs in quantum computing")
+```
+
+## Available sources
+
+AgentDB ingests from 20 curated sources across three categories:
+
+| Category | Sources |
+| :--- | :--- |
+| Market & finance | Bloomberg, CNBC, Reuters, Prof G Markets, Rebel Capitalist, All-In Podcast, Zero Hedge, Marginal Revolution |
+| Technology & AI | Lex Fridman (YouTube + Podcast), Y Combinator, Hacker News, Ars Technica, Dwarkesh Podcast, Acquired, Hard Fork |
+| Science & philosophy | Closer To Truth, Bernardo Kastrup, Quanta Magazine, Sean Carroll's Mindscape |
+
+Content is refreshed **Monday, Wednesday, and Friday at 07:00 UTC**.
+
+## API reference
+
+For full API documentation see the
+[AgentDBRetriever](https://api.python.langchain.com/en/latest/retrievers/langchain_community.retrievers.agentdb.AgentDBRetriever.html)
+API reference.
