@@ -57,6 +57,54 @@ echo "Summarise today's market news" | \
 
 ---
 
+## 04 — LangGraph agent
+
+**`04_langgraph_agent.py`** — AgentDB wired into a LangGraph tool node. The agent autonomously decides when to call `get_latest_knowledge` or `search_knowledge`.
+
+```bash
+pip install langgraph langchain-anthropic httpx
+ANTHROPIC_API_KEY=sk-ant-xxx AGENTDB_API_KEY=adb_xxx \
+    python 04_langgraph_agent.py "What's happening in AI this week?"
+```
+
+---
+
+## 05 — CrewAI research crew
+
+**`05_crewai_agent.py`** — Two-agent crew: a Researcher fetches context from AgentDB, an Analyst synthesises it into a briefing.
+
+```bash
+pip install crewai httpx
+ANTHROPIC_API_KEY=sk-ant-xxx AGENTDB_API_KEY=adb_xxx \
+    python 05_crewai_agent.py "What's the latest in quantum computing?"
+```
+
+---
+
+## 06 — AutoGen agent
+
+**`06_autogen_agent.py`** — AutoGen AssistantAgent with AgentDB tools registered. Works with Anthropic or OpenAI.
+
+```bash
+pip install pyautogen httpx
+ANTHROPIC_API_KEY=sk-ant-xxx AGENTDB_API_KEY=adb_xxx \
+    python 06_autogen_agent.py "Summarise today's market news"
+```
+
+---
+
+## 07 — LlamaIndex ReAct agent
+
+**`07_llamaindex_agent.py`** — LlamaIndex ReActAgent with AgentDB as FunctionTools. Reasons step-by-step, fetching knowledge as needed.
+
+```bash
+pip install llama-index llama-index-llms-anthropic httpx
+ANTHROPIC_API_KEY=sk-ant-xxx AGENTDB_API_KEY=adb_xxx \
+    python 07_llamaindex_agent.py "What are researchers saying about quantum computing?"
+```
+
+---
+
 ## MCP server (Claude Code / Claude Desktop)
 
 For the cleanest integration, use the MCP server — AgentDB tools appear natively inside Claude's tool use without any code:
