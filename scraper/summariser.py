@@ -12,7 +12,7 @@ import anthropic
 
 logger = logging.getLogger(__name__)
 
-MODEL = "claude-opus-4-5"
+MODEL = "claude-3-5-haiku-20241022"
 MAX_INPUT_CHARS = 80_000  # ~20k tokens; truncate beyond this to stay within context
 
 SYSTEM_PROMPT = """\
@@ -152,16 +152,29 @@ def summarise(
         text=truncated_text,
     )
 
+    import os
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        logger.error("ANTHROPIC_API_KEY is not set — cannot call Claude API")
+        return None
+    if len(api_key) < 20:
+        logger.error("ANTHROPIC_API_KEY looks invalid (length %d) — check Railway Variables", len(api_key))
+        return None
+
     try:
-        client = anthropic.Anthropic()  # uses ANTHROPIC_API_KEY env var
+        client = anthropic.Anthropic(api_key=api_key)
+        logger.debug("Calling Claude API (model=%s, key_prefix=%s...)", MODEL, api_key[:12])
         message = client.messages.create(
             model=MODEL,
             max_tokens=2048,
             system=SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_message}],
         )
+    except anthropic.AuthenticationError as exc:
+        logger.error("Claude API auth failed — ANTHROPIC_API_KEY is invalid: %s", exc)
+        return None
     except anthropic.APIConnectionError as exc:
-        logger.error("Connection error calling Claude API: %s", exc)
+        logger.error("Connection error calling Claude API (network/DNS issue): %s", exc)
         return None
     except anthropic.RateLimitError as exc:
         logger.error("Rate limit exceeded calling Claude API: %s", exc)
@@ -170,7 +183,7 @@ def summarise(
         logger.error("Claude API error (status %s): %s", exc.status_code, exc.message)
         return None
     except Exception as exc:
-        logger.error("Unexpected error calling Claude API: %s", exc)
+        logger.error("Unexpected error calling Claude API (%s): %s", type(exc).__name__, exc)
         return None
 
     raw_content = message.content[0].text if message.content else ""

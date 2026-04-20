@@ -12,8 +12,8 @@ YOUTUBE_SOURCES = []
 # Former YouTube sources now ingested via RSS article feeds
 _FORMER_YOUTUBE_AS_RSS = [
     {
-        "name": "Bloomberg",
-        "rss_url": "https://feeds.bloomberg.com/markets/news.rss",
+        "name": "MarketWatch",
+        "rss_url": "https://feeds.content.dowjones.io/public/rss/mw_topstories",
         "category": "market_news",
     },
     {
@@ -138,8 +138,8 @@ BLOG_SOURCES = [
     # Former YouTube sources — replaced with RSS article feeds (YouTube transcripts
     # are blocked from Railway server IPs)
     {
-        "name": "Bloomberg",
-        "rss_url": "https://feeds.bloomberg.com/markets/news.rss",
+        "name": "MarketWatch",
+        "rss_url": "https://feeds.content.dowjones.io/public/rss/mw_topstories",
         "category": "market_news",
     },
     {
