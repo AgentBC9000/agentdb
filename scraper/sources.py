@@ -20,11 +20,6 @@ YOUTUBE_SOURCES = [
         "category": "market_news",
     },
     {
-        "name": "Lex Fridman",
-        "channel_id": "UCSHZKyawb77ixDdsGog4iWA",
-        "category": "technology_ai",
-    },
-    {
         "name": "Closer To Truth",
         "channel_id": "UCl9StMQ79LtEvlrskzjoYbQ",
         "category": "philosophy_science",

@@ -140,7 +140,7 @@ def scrape_youtube_source(channel_id: str, source_name: str) -> Optional[dict]:
     """
     logger.info("Fetching recent videos for %s (channel: %s)", source_name, channel_id)
 
-    videos = get_recent_videos(channel_id, max_count=3)
+    videos = get_recent_videos(channel_id, max_count=10)
     if not videos:
         logger.warning("Could not retrieve any videos for %s", source_name)
         return None
@@ -150,6 +150,12 @@ def scrape_youtube_source(channel_id: str, source_name: str) -> Optional[dict]:
         video_id = video_meta["video_id"]
         title = video_meta["title"]
         url = VIDEO_URL.format(video_id=video_id)
+
+        # Skip live streams — they never have transcripts
+        title_lower = title.lower()
+        if title_lower.startswith("live:") or "| live" in title_lower or title_lower.startswith("breaking:"):
+            logger.info("Skipping live/breaking video '%s'", title)
+            continue
 
         logger.info("Trying video '%s' (%s)", title, video_id)
         transcript = get_transcript(video_id)
