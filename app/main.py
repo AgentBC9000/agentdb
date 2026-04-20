@@ -79,9 +79,13 @@ async def debug_auth():
     from app.core.config import get_admin_secret
     resolved = get_admin_secret()
     def mask(v):
-        return v[:4] + "***" if v and len(v) > 4 else "(empty or short)"
+        if not v:
+            return "(empty)"
+        return v[:4] + "***" + v[-4:] if len(v) > 8 else v[:4] + "***"
+    raw_admin = os.environ.get("ADMIN_SECRET", "")
+    raw_agentdb = os.environ.get("AGENTDB_ADMIN_SECRET", "")
     return {
-        "ADMIN_SECRET_raw": mask(os.environ.get("ADMIN_SECRET", "")),
-        "AGENTDB_ADMIN_SECRET_raw": mask(os.environ.get("AGENTDB_ADMIN_SECRET", "")),
-        "resolved": mask(resolved),
+        "ADMIN_SECRET":         {"masked": mask(raw_admin),          "len": len(raw_admin),          "stripped_len": len(raw_admin.strip())},
+        "AGENTDB_ADMIN_SECRET": {"masked": mask(raw_agentdb),        "len": len(raw_agentdb),        "stripped_len": len(raw_agentdb.strip())},
+        "resolved":             {"masked": mask(resolved),           "len": len(resolved)},
     }

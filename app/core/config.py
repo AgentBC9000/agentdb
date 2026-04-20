@@ -63,11 +63,11 @@ settings = Settings()
 def get_admin_secret() -> str:
     """
     Read the effective admin secret directly from os.environ at call time.
-    Checks ADMIN_SECRET first, then AGENTDB_ADMIN_SECRET, so either Railway
-    variable name works without duplicating secrets.
+    Checks AGENTDB_ADMIN_SECRET first (the clean shared variable), then
+    ADMIN_SECRET as fallback.
     """
     import os
-    for var in ("ADMIN_SECRET", "AGENTDB_ADMIN_SECRET"):
+    for var in ("AGENTDB_ADMIN_SECRET", "ADMIN_SECRET"):
         val = os.environ.get(var, "").strip()
         if val and val not in ("", "change-me-in-production"):
             return val
