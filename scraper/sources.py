@@ -126,8 +126,8 @@ BLOG_SOURCES = [
         "category": "startups_ipo",
     },
     {
-        "name": "Wired",
-        "rss_url": "https://www.wired.com/feed/rss",
+        "name": "IEEE Spectrum",
+        "rss_url": "https://spectrum.ieee.org/rss/fulltext",
         "category": "technology_ai",
     },
     {
@@ -136,8 +136,8 @@ BLOG_SOURCES = [
         "category": "startups_ipo",
     },
     {
-        "name": "Tech Wire Asia",
-        "rss_url": "https://techwireasia.com/feed/",
+        "name": "The Hindu Business Line",
+        "rss_url": "https://www.thehindubusinessline.com/feeder/default.rss",
         "category": "emerging_markets_asia",
     },
     {
@@ -177,8 +177,8 @@ BLOG_SOURCES = [
         "category": "market_news",
     },
     {
-        "name": "Collaborative Fund Blog",
-        "rss_url": "https://collabfund.com/blog/feed.rss",
+        "name": "Farnam Street",
+        "rss_url": "https://fs.blog/feed/",
         "category": "market_news_alternative",
     },
     # ── Emerging Markets ─────────────────────────────────────────────────────
@@ -198,8 +198,8 @@ BLOG_SOURCES = [
         "category": "emerging_markets_africa",
     },
     {
-        "name": "Disrupt Africa",
-        "rss_url": "https://disrupt-africa.com/feed/",
+        "name": "How We Made It In Africa",
+        "rss_url": "https://www.howwemadeitinafrica.com/feed/",
         "category": "emerging_markets_africa",
     },
     {
