@@ -4,7 +4,7 @@ from pydantic import BaseModel
 import uuid
 import json
 
-from app.core.config import settings
+from app.core.config import settings, get_admin_secret
 from app.core.dependencies import get_current_key
 from app.db.client import get_db
 from app.services.rate_limiter import check_rate_limit, check_demo_rate_limit
@@ -289,7 +289,7 @@ async def ingest_item(
     Requires ?secret=<admin-secret> query parameter.
     Not accessible to regular API keys.
     """
-    if secret != settings.effective_admin_secret:
+    if secret != get_admin_secret():
         raise HTTPException(status_code=403, detail="Invalid admin secret")
 
     item_id = str(uuid.uuid4())

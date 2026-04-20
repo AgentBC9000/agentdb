@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 import uuid
 
-from app.core.config import settings
+from app.core.config import settings, get_admin_secret
 from app.core.security import generate_api_key, get_trial_expiry
 from app.db.client import get_db
 from app.core.dependencies import get_current_key
@@ -82,7 +82,7 @@ async def upgrade_key(
     db=Depends(get_db),
 ):
     """Admin endpoint — upgrade an API key's tier."""
-    if secret != settings.effective_admin_secret:
+    if secret != get_admin_secret():
         raise HTTPException(status_code=403, detail="Invalid admin secret")
 
     if tier not in ("trial", "pro", "fleet"):
@@ -108,7 +108,7 @@ async def run_migration(
     db=Depends(get_db),
 ):
     """Admin endpoint — run pending DB migrations."""
-    if secret != settings.effective_admin_secret:
+    if secret != get_admin_secret():
         raise HTTPException(status_code=403, detail="Invalid admin secret")
 
     migrations = []
@@ -129,7 +129,7 @@ async def get_stats(
     db=Depends(get_db),
 ):
     """Admin endpoint — subscriber counts and usage stats."""
-    if secret != settings.effective_admin_secret:
+    if secret != get_admin_secret():
         raise HTTPException(status_code=403, detail="Invalid admin secret")
 
     tiers = await db.fetch_all(

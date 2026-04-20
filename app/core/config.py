@@ -48,17 +48,9 @@ class Settings(BaseSettings):
     RATE_LIMIT_BASIC: int = 1000
     RATE_LIMIT_PRO: int = 99999
 
-    # Admin — accepts either ADMIN_SECRET or AGENTDB_ADMIN_SECRET (shared var alias)
+    # Admin
     ADMIN_SECRET: str = ""
     AGENTDB_ADMIN_SECRET: str = ""
-
-    @property
-    def effective_admin_secret(self) -> str:
-        """Return whichever admin secret env var is populated, in priority order."""
-        for candidate in (self.ADMIN_SECRET, self.AGENTDB_ADMIN_SECRET):
-            if candidate and candidate.strip() and candidate.strip() != "change-me-in-production":
-                return candidate.strip()
-        return "change-me-in-production"
 
     class Config:
         env_file = ".env"
@@ -66,3 +58,17 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+def get_admin_secret() -> str:
+    """
+    Read the effective admin secret directly from os.environ at call time.
+    Checks ADMIN_SECRET first, then AGENTDB_ADMIN_SECRET, so either Railway
+    variable name works without duplicating secrets.
+    """
+    import os
+    for var in ("ADMIN_SECRET", "AGENTDB_ADMIN_SECRET"):
+        val = os.environ.get(var, "").strip()
+        if val and val not in ("", "change-me-in-production"):
+            return val
+    return "change-me-in-production"
