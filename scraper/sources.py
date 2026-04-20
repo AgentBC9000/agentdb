@@ -66,14 +66,14 @@ PODCAST_SOURCES = [
         ],
     },
     {
-        "name": "Tim Ferriss Show",
-        "rss_url": "https://feeds.feedburner.com/timferriss",
+        "name": "How I Built This",
+        "rss_url": "https://feeds.npr.org/510313/podcast.xml",
         "category": "startups_ipo",
-        "hosts": ["Tim Ferriss"],
+        "hosts": ["Guy Raz"],
         "transcript_selectors": [
-            "div.show-notes",
+            "div.transcript",
             "article",
-            "div.entry-content",
+            "div.storytext",
         ],
     },
     # ── Markets / Finance ────────────────────────────────────────────────────
@@ -121,23 +121,23 @@ BLOG_SOURCES = [
         "category": "startups_ipo",
     },
     {
-        "name": "a16z Blog",
-        "rss_url": "https://a16z.com/feed/",
+        "name": "SaaStr Blog",
+        "rss_url": "https://www.saastr.com/feed/",
         "category": "startups_ipo",
     },
     {
-        "name": "First Round Review",
-        "rss_url": "https://review.firstround.com/feed.xml",
+        "name": "VentureBeat",
+        "rss_url": "https://venturebeat.com/feed/",
         "category": "startups_ipo",
     },
     {
-        "name": "The Hustle",
-        "rss_url": "https://thehustle.co/feed/",
+        "name": "Inc Magazine",
+        "rss_url": "https://www.inc.com/rss.xml",
         "category": "startups_ipo",
     },
     {
-        "name": "Tech in Asia",
-        "rss_url": "https://www.techinasia.com/feed",
+        "name": "KrASIA",
+        "rss_url": "https://kr.asia/feed/",
         "category": "emerging_markets_asia",
     },
     # ── Alternative Markets / Macro ──────────────────────────────────────────
@@ -152,8 +152,8 @@ BLOG_SOURCES = [
         "category": "market_news_alternative",
     },
     {
-        "name": "Calculated Risk",
-        "rss_url": "https://www.calculatedriskblog.com/feeds/posts/default",
+        "name": "Econbrowser",
+        "rss_url": "https://econbrowser.com/feed",
         "category": "market_news_alternative",
     },
     {
@@ -183,8 +183,8 @@ BLOG_SOURCES = [
         "category": "emerging_markets_africa",
     },
     {
-        "name": "Nairametrics",
-        "rss_url": "https://nairametrics.com/feed/",
+        "name": "Techpoint Africa",
+        "rss_url": "https://techpoint.africa/feed/",
         "category": "emerging_markets_africa",
     },
 ]
