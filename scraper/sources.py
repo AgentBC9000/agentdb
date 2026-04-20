@@ -111,7 +111,7 @@ BLOG_SOURCES = [
     },
     {
         "name": "Hacker News",
-        "rss_url": "https://hnrss.org/frontpage",
+        "rss_url": "https://hnrss.org/frontpage?link=comments",
         "category": "startups_ipo",
     },
     # ── Startups / IPO ───────────────────────────────────────────────────────
@@ -121,23 +121,23 @@ BLOG_SOURCES = [
         "category": "startups_ipo",
     },
     {
-        "name": "SaaStr Blog",
-        "rss_url": "https://www.saastr.com/feed/",
+        "name": "The Verge",
+        "rss_url": "https://www.theverge.com/rss/index.xml",
         "category": "startups_ipo",
     },
     {
-        "name": "VentureBeat",
-        "rss_url": "https://venturebeat.com/feed/",
+        "name": "Wired",
+        "rss_url": "https://www.wired.com/feed/rss",
+        "category": "technology_ai",
+    },
+    {
+        "name": "Entrepreneur",
+        "rss_url": "https://www.entrepreneur.com/latest.rss",
         "category": "startups_ipo",
     },
     {
-        "name": "Inc Magazine",
-        "rss_url": "https://www.inc.com/rss.xml",
-        "category": "startups_ipo",
-    },
-    {
-        "name": "KrASIA",
-        "rss_url": "https://kr.asia/feed/",
+        "name": "Tech Wire Asia",
+        "rss_url": "https://techwireasia.com/feed/",
         "category": "emerging_markets_asia",
     },
     # ── Alternative Markets / Macro ──────────────────────────────────────────
