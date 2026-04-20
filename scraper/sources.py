@@ -5,8 +5,7 @@ Focus: Startups/IPO, alternative markets, emerging markets (Africa/Asia),
 AI/tech (non-legacy), contrarian macro. No legacy wire services.
 
 YouTube RSS feeds yield video title + description only (no transcripts —
-Railway IPs are blocked from YouTube transcript APIs). Description-based
-summaries still provide useful signal for channels with detailed descriptions.
+Railway IPs are blocked from YouTube transcript APIs).
 """
 
 YOUTUBE_SOURCES = []  # transcript scraping blocked on Railway — use YouTube RSS below
@@ -67,13 +66,14 @@ PODCAST_SOURCES = [
         ],
     },
     {
-        "name": "20VC",
-        "rss_url": "https://rss.art19.com/the-twenty-minute-vc",
+        "name": "Tim Ferriss Show",
+        "rss_url": "https://feeds.feedburner.com/timferriss",
         "category": "startups_ipo",
-        "hosts": ["Harry Stebbings"],
+        "hosts": ["Tim Ferriss"],
         "transcript_selectors": [
             "div.show-notes",
             "article",
+            "div.entry-content",
         ],
     },
     # ── Markets / Finance ────────────────────────────────────────────────────
@@ -121,24 +121,24 @@ BLOG_SOURCES = [
         "category": "startups_ipo",
     },
     {
-        "name": "Not Boring",
-        "rss_url": "https://www.notboring.co/feed",
+        "name": "a16z Blog",
+        "rss_url": "https://a16z.com/feed/",
         "category": "startups_ipo",
     },
     {
-        "name": "The Generalist",
-        "rss_url": "https://www.thegeneralist.io/feed",
+        "name": "First Round Review",
+        "rss_url": "https://review.firstround.com/feed.xml",
         "category": "startups_ipo",
     },
     {
-        "name": "Newcomer",
-        "rss_url": "https://www.newcomer.co/feed",
+        "name": "The Hustle",
+        "rss_url": "https://thehustle.co/feed/",
         "category": "startups_ipo",
     },
     {
-        "name": "Sifted",
-        "rss_url": "https://sifted.eu/rss",
-        "category": "startups_ipo",
+        "name": "Tech in Asia",
+        "rss_url": "https://www.techinasia.com/feed",
+        "category": "emerging_markets_asia",
     },
     # ── Alternative Markets / Macro ──────────────────────────────────────────
     {
@@ -147,23 +147,23 @@ BLOG_SOURCES = [
         "category": "market_news_alternative",
     },
     {
-        "name": "Lyn Alden",
-        "rss_url": "https://www.lynalden.com/feed/",
+        "name": "Wolf Street",
+        "rss_url": "https://wolfstreet.com/feed/",
         "category": "market_news_alternative",
     },
     {
-        "name": "Of Two Minds",
-        "rss_url": "https://www.oftwominds.com/blog.rss",
+        "name": "Calculated Risk",
+        "rss_url": "https://www.calculatedriskblog.com/feeds/posts/default",
         "category": "market_news_alternative",
     },
     {
-        "name": "Prof G Markets",
-        "rss_url": "https://profgmarkets.substack.com/feed",
+        "name": "A Wealth of Common Sense",
+        "rss_url": "https://awealthofcommonsense.com/feed/",
         "category": "market_news_alternative",
     },
     {
-        "name": "Epsilon Theory",
-        "rss_url": "https://www.epsilontheory.com/?feed=rss2",
+        "name": "The Big Picture",
+        "rss_url": "https://ritholtz.com/feed/",
         "category": "market_news_alternative",
     },
     {
@@ -183,15 +183,13 @@ BLOG_SOURCES = [
         "category": "emerging_markets_africa",
     },
     {
-        "name": "e27",
-        "rss_url": "https://e27.co/feed/",
-        "category": "emerging_markets_asia",
+        "name": "Nairametrics",
+        "rss_url": "https://nairametrics.com/feed/",
+        "category": "emerging_markets_africa",
     },
 ]
 
 # YouTube RSS — video title + description from RSS entry (no transcript).
-# Processed via blog pipeline with rss_description fallback in blog_scraper.
-# Note: channel IDs must be exact — wrong IDs return malformed XML error pages.
 YOUTUBE_RSS_SOURCES = [
     {
         "name": "Y Combinator",
