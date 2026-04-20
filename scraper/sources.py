@@ -1,48 +1,45 @@
 """
 AgentDB Knowledge Scraper — Source Definitions
-All YouTube channels and blogs to scrape on each run.
+All blogs, podcasts to scrape on each run.
+YouTube sources removed — Railway server IPs are blocked from accessing
+YouTube transcripts. Replaced with RSS feeds for the same editorial sources.
 """
 
-YOUTUBE_SOURCES = [
+# YouTube transcript scraping is blocked from cloud server IPs.
+# Keeping the list empty — YouTube channels are replaced by RSS equivalents below.
+YOUTUBE_SOURCES = []
+
+# Former YouTube sources now ingested via RSS article feeds
+_FORMER_YOUTUBE_AS_RSS = [
     {
         "name": "Bloomberg",
-        "channel_id": "UCIALMKvObZNtJ6AmdCLP7Lg",
+        "rss_url": "https://feeds.bloomberg.com/markets/news.rss",
+        "category": "market_news",
+    },
+    {
+        "name": "Reuters Business",
+        "rss_url": "https://feeds.reuters.com/reuters/businessNews",
         "category": "market_news",
     },
     {
         "name": "CNBC",
-        "channel_id": "UCrp_UI8XtuYfpiqluWLD7Lw",
+        "rss_url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114",
         "category": "market_news",
-    },
-    {
-        "name": "Reuters",
-        "channel_id": "UChqUTb7kYRX8-EiaN3XFrSQ",
-        "category": "market_news",
-    },
-    {
-        "name": "Closer To Truth",
-        "channel_id": "UCl9StMQ79LtEvlrskzjoYbQ",
-        "category": "philosophy_science",
-    },
-    {
-        "name": "Y Combinator",
-        "channel_id": "UCcefcZRL2oaA_uBNeo5UOWg",
-        "category": "startups_technology",
-    },
-    {
-        "name": "Rebel Capitalist",
-        "channel_id": "UCNjyEXSvYUUCzagFAKmaJ1Q",
-        "category": "market_news_alternative",
-    },
-    {
-        "name": "Bernardo Kastrup",
-        "channel_id": "UCeDZCa3VrRQvzBlVR-oVVmA",
-        "category": "philosophy_science",
     },
     {
         "name": "Prof G Markets",
-        "channel_id": "UCp4CBeq4nzeg9smAvdjPrig",
+        "rss_url": "https://rss.substack.com/feed/profgmarkets",
         "category": "market_news",
+    },
+    {
+        "name": "Rebel Capitalist",
+        "rss_url": "https://rebelcapitalist.com/feed/",
+        "category": "market_news_alternative",
+    },
+    {
+        "name": "Y Combinator Blog",
+        "rss_url": "https://www.ycombinator.com/blog/rss.xml",
+        "category": "startups_technology",
     },
 ]
 
@@ -137,5 +134,37 @@ BLOG_SOURCES = [
         "name": "Hacker News",
         "rss_url": "https://hnrss.org/frontpage",
         "category": "technology_startups",
+    },
+    # Former YouTube sources — replaced with RSS article feeds (YouTube transcripts
+    # are blocked from Railway server IPs)
+    {
+        "name": "Bloomberg",
+        "rss_url": "https://feeds.bloomberg.com/markets/news.rss",
+        "category": "market_news",
+    },
+    {
+        "name": "Reuters Business",
+        "rss_url": "https://feeds.reuters.com/reuters/businessNews",
+        "category": "market_news",
+    },
+    {
+        "name": "CNBC",
+        "rss_url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114",
+        "category": "market_news",
+    },
+    {
+        "name": "Prof G Markets",
+        "rss_url": "https://rss.substack.com/feed/profgmarkets",
+        "category": "market_news",
+    },
+    {
+        "name": "Rebel Capitalist",
+        "rss_url": "https://rebelcapitalist.com/feed/",
+        "category": "market_news_alternative",
+    },
+    {
+        "name": "Y Combinator Blog",
+        "rss_url": "https://www.ycombinator.com/blog/rss.xml",
+        "category": "startups_technology",
     },
 ]
