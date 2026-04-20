@@ -21,7 +21,7 @@ from blog_scraper import scrape_blog_source
 from ingest import ingest_item
 from podcast_scraper import scrape_podcast_source
 from reporter import send_report
-from sources import BLOG_SOURCES, PODCAST_SOURCES
+from sources import BLOG_SOURCES, PODCAST_SOURCES, YOUTUBE_RSS_SOURCES
 from summariser import summarise
 
 # ---------------------------------------------------------------------------
@@ -207,9 +207,10 @@ def main() -> None:
     logger.info("=" * 60)
     logger.info("AgentDB Knowledge Scraper — starting run")
     logger.info(
-        "Sources: %d blogs, %d podcasts",
+        "Sources: %d blogs, %d podcasts, %d YouTube RSS",
         len(BLOG_SOURCES),
         len(PODCAST_SOURCES),
+        len(YOUTUBE_RSS_SOURCES),
     )
     logger.info("=" * 60)
 
@@ -228,6 +229,14 @@ def main() -> None:
         all_results.append(result)
         status = "OK" if result["success"] else f"FAIL ({result.get('error', '?')})"
         logger.info("[Blog] %s → %s", source["name"], status)
+
+    # --- YouTube RSS (description-based) ---
+    for source in YOUTUBE_RSS_SOURCES:
+        result = _process_blog_source(source)
+        result["content_type"] = "youtube_rss"
+        all_results.append(result)
+        status = "OK" if result["success"] else f"FAIL ({result.get('error', '?')})"
+        logger.info("[YouTube] %s → %s", source["name"], status)
 
     # --- Summary ---
     succeeded = sum(1 for r in all_results if r["success"])

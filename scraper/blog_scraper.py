@@ -94,7 +94,22 @@ def get_latest_article(rss_url: str, source_name: str) -> Optional[dict]:
         return None
 
     logger.info("Latest article for %s: '%s' (%s)", source_name, title, url)
-    return {"title": title, "url": url}
+
+    # For YouTube RSS feeds, extract the video description from the entry
+    # (transcript scraping is blocked on Railway — description is the best we can do)
+    rss_text = ""
+    if "youtube.com/feeds" in rss_url:
+        rss_text = (
+            entry.get("summary")
+            or entry.get("description")
+            or ""
+        ).strip()
+        if rss_text:
+            logger.info("YouTube RSS description for %s: %d chars", source_name, len(rss_text))
+        else:
+            logger.warning("YouTube RSS entry for %s has no description", source_name)
+
+    return {"title": title, "url": url, "rss_text": rss_text}
 
 
 def _is_noise_element(tag) -> bool:
@@ -232,6 +247,20 @@ def scrape_blog_source(rss_url: str, source_name: str) -> Optional[dict]:
     article_meta = get_latest_article(rss_url, source_name)
     if article_meta is None:
         return None
+
+    # YouTube RSS: use the video description directly — don't scrape the video page
+    if article_meta.get("rss_text"):
+        if len(article_meta["rss_text"]) < 100:
+            logger.warning(
+                "YouTube description too short for %s (%d chars) — skipping",
+                source_name, len(article_meta["rss_text"])
+            )
+            return None
+        return {
+            "title": article_meta["title"],
+            "url": article_meta["url"],
+            "text": article_meta["rss_text"],
+        }
 
     scraped = scrape_article(article_meta["url"])
     if scraped is None:
