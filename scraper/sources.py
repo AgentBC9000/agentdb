@@ -68,7 +68,7 @@ PODCAST_SOURCES = [
     },
     {
         "name": "20VC",
-        "rss_url": "https://feeds.simplecast.com/4T39_jAj",
+        "rss_url": "https://rss.art19.com/the-twenty-minute-vc",
         "category": "startups_ipo",
         "hosts": ["Harry Stebbings"],
         "transcript_selectors": [
@@ -100,8 +100,8 @@ PODCAST_SOURCES = [
 BLOG_SOURCES = [
     # ── Technology / AI (non-legacy) ─────────────────────────────────────────
     {
-        "name": "Wired",
-        "rss_url": "https://www.wired.com/feed/rss",
+        "name": "MIT Technology Review",
+        "rss_url": "https://www.technologyreview.com/feed/",
         "category": "technology_ai",
     },
     {
