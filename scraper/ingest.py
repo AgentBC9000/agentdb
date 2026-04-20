@@ -22,7 +22,7 @@ def _get_config() -> Optional[tuple]:
     Returns:
         Tuple of (api_url, admin_secret), or None if either is missing.
     """
-    api_url = os.environ.get("AGENTDB_API_URL", "").rstrip("/")
+    api_url = os.environ.get("AGENTDB_API_URL", "").strip().rstrip("/")
     admin_secret = os.environ.get("AGENTDB_ADMIN_SECRET", "")
 
     if not api_url:
