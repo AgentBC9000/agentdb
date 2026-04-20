@@ -1,0 +1,6 @@
+[build]
+dockerfilePath = "scraper/Dockerfile"
+
+[deploy]
+cronSchedule = "0 7 * * 1,3,5"
+restartPolicyType = "never"
