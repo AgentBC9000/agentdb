@@ -140,6 +140,11 @@ BLOG_SOURCES = [
         "rss_url": "https://techwireasia.com/feed/",
         "category": "emerging_markets_asia",
     },
+    {
+        "name": "TechCrunch",
+        "rss_url": "https://techcrunch.com/feed/",
+        "category": "startups_ipo",
+    },
     # ── Alternative Markets / Macro ──────────────────────────────────────────
     {
         "name": "Zero Hedge",
@@ -171,6 +176,11 @@ BLOG_SOURCES = [
         "rss_url": "https://www.thedailyupside.com/feed/",
         "category": "market_news",
     },
+    {
+        "name": "Collaborative Fund Blog",
+        "rss_url": "https://collabfund.com/blog/feed.rss",
+        "category": "market_news_alternative",
+    },
     # ── Emerging Markets ─────────────────────────────────────────────────────
     {
         "name": "Rest of World",
@@ -186,6 +196,16 @@ BLOG_SOURCES = [
         "name": "Techpoint Africa",
         "rss_url": "https://techpoint.africa/feed/",
         "category": "emerging_markets_africa",
+    },
+    {
+        "name": "Disrupt Africa",
+        "rss_url": "https://disrupt-africa.com/feed/",
+        "category": "emerging_markets_africa",
+    },
+    {
+        "name": "Mint (India)",
+        "rss_url": "https://www.livemint.com/rss/news",
+        "category": "emerging_markets_asia",
     },
 ]
 
