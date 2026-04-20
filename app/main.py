@@ -57,3 +57,13 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 @app.get("/health")
 async def health():
     return {"status": "ok", "version": "1.0.0"}
+
+
+@app.get("/debug/db")
+async def debug_db():
+    """Temporary: reveal which DB the app is connected to."""
+    url = settings.DATABASE_URL
+    # Mask password but show host/db
+    import re
+    masked = re.sub(r":([^@]+)@", ":***@", url)
+    return {"database_url": masked}
