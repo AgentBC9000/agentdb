@@ -67,16 +67,6 @@ PODCAST_SOURCES = [
         ],
     },
     {
-        "name": "My First Million",
-        "rss_url": "https://rss.art19.com/my-first-million",
-        "category": "startups_ipo",
-        "hosts": ["Sam Parr", "Shaan Puri"],
-        "transcript_selectors": [
-            "div.show-notes",
-            "article",
-        ],
-    },
-    {
         "name": "20VC",
         "rss_url": "https://feeds.simplecast.com/4T39_jAj",
         "category": "startups_ipo",
@@ -86,17 +76,6 @@ PODCAST_SOURCES = [
             "article",
         ],
     },
-    {
-        "name": "Founders Podcast",
-        "rss_url": "https://feeds.supercast.com/founders",
-        "category": "startups_ipo",
-        "hosts": ["David Senra"],
-        "transcript_selectors": [
-            "div.show-notes",
-            "article",
-            "div.entry-content",
-        ],
-    },
     # ── Markets / Finance ────────────────────────────────────────────────────
     {
         "name": "All-In Podcast",
@@ -104,16 +83,6 @@ PODCAST_SOURCES = [
         "category": "market_news_alternative",
         "hosts": ["Chamath Palihapitiya", "Jason Calacanis", "David Sacks", "David Friedberg"],
         "transcript_selectors": [],
-    },
-    {
-        "name": "Invest Like the Best",
-        "rss_url": "https://rss.art19.com/invest-like-the-best",
-        "category": "market_news",
-        "hosts": ["Patrick O'Shaughnessy"],
-        "transcript_selectors": [
-            "div.show-notes",
-            "article",
-        ],
     },
     {
         "name": "Prof G Markets Podcast",
@@ -167,8 +136,8 @@ BLOG_SOURCES = [
         "category": "startups_ipo",
     },
     {
-        "name": "Crunchbase News",
-        "rss_url": "https://news.crunchbase.com/feed/",
+        "name": "Sifted",
+        "rss_url": "https://sifted.eu/rss",
         "category": "startups_ipo",
     },
     # ── Alternative Markets / Macro ──────────────────────────────────────────
@@ -178,28 +147,28 @@ BLOG_SOURCES = [
         "category": "market_news_alternative",
     },
     {
-        "name": "Rebel Capitalist",
-        "rss_url": "https://rebelcapitalist.com/feed/",
+        "name": "Lyn Alden",
+        "rss_url": "https://www.lynalden.com/feed/",
+        "category": "market_news_alternative",
+    },
+    {
+        "name": "Of Two Minds",
+        "rss_url": "https://www.oftwominds.com/blog.rss",
         "category": "market_news_alternative",
     },
     {
         "name": "Prof G Markets",
-        "rss_url": "https://rss.substack.com/feed/profgmarkets",
-        "category": "market_news_alternative",
-    },
-    {
-        "name": "The Macro Compass",
-        "rss_url": "https://themacrocompass.substack.com/feed",
+        "rss_url": "https://profgmarkets.substack.com/feed",
         "category": "market_news_alternative",
     },
     {
         "name": "Epsilon Theory",
-        "rss_url": "https://www.epsilontheory.com/feed/",
+        "rss_url": "https://www.epsilontheory.com/?feed=rss2",
         "category": "market_news_alternative",
     },
     {
-        "name": "MarketWatch",
-        "rss_url": "https://feeds.content.dowjones.io/public/rss/mw_topstories",
+        "name": "The Daily Upside",
+        "rss_url": "https://www.thedailyupside.com/feed/",
         "category": "market_news",
     },
     # ── Emerging Markets ─────────────────────────────────────────────────────
@@ -214,25 +183,16 @@ BLOG_SOURCES = [
         "category": "emerging_markets_africa",
     },
     {
-        "name": "KrASIA",
-        "rss_url": "https://kr-asia.com/feed",
+        "name": "e27",
+        "rss_url": "https://e27.co/feed/",
         "category": "emerging_markets_asia",
     },
 ]
 
-# YouTube RSS — video title + description scraped from RSS entry (no transcript).
+# YouTube RSS — video title + description from RSS entry (no transcript).
 # Processed via blog pipeline with rss_description fallback in blog_scraper.
+# Note: channel IDs must be exact — wrong IDs return malformed XML error pages.
 YOUTUBE_RSS_SOURCES = [
-    {
-        "name": "Patrick Boyle",
-        "rss_url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCASM3r88ZDqAEXi6PH-GZGA",
-        "category": "market_news_alternative",
-    },
-    {
-        "name": "George Gammon",
-        "rss_url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCivbtfXQOkLGOZKdKgfRiNw",
-        "category": "market_news_alternative",
-    },
     {
         "name": "Y Combinator",
         "rss_url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCcefcZRL2oaA_uBNeo5UOWg",
