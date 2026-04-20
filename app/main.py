@@ -45,14 +45,13 @@ app.include_router(api_v1_router, prefix="/v1")
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):
-    logger.error(
-        "Unhandled exception on %s %s: %s\n%s",
-        request.method,
-        request.url.path,
-        exc,
-        traceback.format_exc(),
+    import sys
+    print(
+        f"ERROR {request.method} {request.url.path}: {exc}\n{traceback.format_exc()}",
+        file=sys.stderr,
+        flush=True,
     )
-    return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
+    return JSONResponse(status_code=500, content={"detail": str(exc)})
 
 
 @app.get("/health")
