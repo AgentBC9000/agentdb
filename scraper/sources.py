@@ -43,8 +43,8 @@ PODCAST_SOURCES = [
         "transcript_selectors": [],
     },
     {
-        "name": "TWiT Intelligent Machines",
-        "rss_url": "https://feeds.twit.tv/intelligentmachines.xml",
+        "name": "This Week in Tech",
+        "rss_url": "https://feeds.twit.tv/twit.xml",
         "category": "technology_ai",
         "hosts": ["Leo Laporte"],
         "transcript_selectors": [
@@ -68,7 +68,7 @@ PODCAST_SOURCES = [
     },
     {
         "name": "My First Million",
-        "rss_url": "https://feeds.megaphone.fm/MFM4954199243",
+        "rss_url": "https://rss.art19.com/my-first-million",
         "category": "startups_ipo",
         "hosts": ["Sam Parr", "Shaan Puri"],
         "transcript_selectors": [
@@ -88,7 +88,7 @@ PODCAST_SOURCES = [
     },
     {
         "name": "Founders Podcast",
-        "rss_url": "https://feeds.simplecast.com/OGETTELl",
+        "rss_url": "https://feeds.supercast.com/founders",
         "category": "startups_ipo",
         "hosts": ["David Senra"],
         "transcript_selectors": [
@@ -107,7 +107,7 @@ PODCAST_SOURCES = [
     },
     {
         "name": "Invest Like the Best",
-        "rss_url": "https://feeds.joincolossus.com/invest_like_the_best",
+        "rss_url": "https://rss.art19.com/invest-like-the-best",
         "category": "market_news",
         "hosts": ["Patrick O'Shaughnessy"],
         "transcript_selectors": [
@@ -131,8 +131,8 @@ PODCAST_SOURCES = [
 BLOG_SOURCES = [
     # ── Technology / AI (non-legacy) ─────────────────────────────────────────
     {
-        "name": "Wired AI",
-        "rss_url": "https://www.wired.com/feed/tag/artificial-intelligence/latest/rss",
+        "name": "Wired",
+        "rss_url": "https://www.wired.com/feed/rss",
         "category": "technology_ai",
     },
     {
