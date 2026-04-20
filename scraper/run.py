@@ -21,9 +21,8 @@ from blog_scraper import scrape_blog_source
 from ingest import ingest_item
 from podcast_scraper import scrape_podcast_source
 from reporter import send_report
-from sources import BLOG_SOURCES, PODCAST_SOURCES, YOUTUBE_SOURCES
+from sources import BLOG_SOURCES, PODCAST_SOURCES
 from summariser import summarise
-from youtube_scraper import scrape_youtube_source
 
 # ---------------------------------------------------------------------------
 # Logging setup
@@ -41,83 +40,6 @@ logger = logging.getLogger("agentdb.scraper")
 # ---------------------------------------------------------------------------
 # Per-source processing helpers
 # ---------------------------------------------------------------------------
-
-
-def _process_youtube_source(source: dict) -> dict[str, Any]:
-    """
-    Scrape → summarise → ingest one YouTube source.
-
-    Returns a result dict suitable for the email report.
-    """
-    name = source["name"]
-    channel_id = source["channel_id"]
-    category = source["category"]
-
-    result: dict[str, Any] = {
-        "source_name": name,
-        "content_type": "youtube",
-        "success": False,
-    }
-
-    # 1. Scrape
-    logger.info("[YouTube] Processing: %s", name)
-    try:
-        scraped = scrape_youtube_source(channel_id, name)
-    except Exception as exc:
-        logger.error("[YouTube] Unhandled error scraping %s: %s", name, exc)
-        result["error"] = f"Scrape exception: {exc}"
-        return result
-
-    if scraped is None:
-        result["error"] = "No transcript available or video not found"
-        logger.warning("[YouTube] Skipping %s — no data", name)
-        return result
-
-    # 2. Summarise
-    try:
-        knowledge = summarise(
-            title=scraped["title"],
-            text=scraped["transcript"],
-            content_type="video",
-            source_name=name,
-            category=category,
-        )
-    except Exception as exc:
-        logger.error("[YouTube] Unhandled error summarising %s: %s", name, exc)
-        result["error"] = f"Summarise exception: {exc}"
-        return result
-
-    if knowledge is None:
-        result["error"] = "Claude summarisation returned no result"
-        logger.warning("[YouTube] Skipping %s — summarisation failed", name)
-        return result
-
-    # Attach scrape metadata so ingest and report can use it
-    knowledge["url"] = scraped["url"]
-    knowledge["video_id"] = scraped["video_id"]
-
-    # 3. Ingest
-    try:
-        ok = ingest_item(knowledge)
-    except Exception as exc:
-        logger.error("[YouTube] Unhandled error ingesting %s: %s", name, exc)
-        result["error"] = f"Ingest exception: {exc}"
-        return result
-
-    if not ok:
-        result["error"] = "AgentDB ingest rejected the item (check logs above)"
-        return result
-
-    result.update(
-        {
-            "success": True,
-            "title": knowledge["title"],
-            "url": scraped["url"],
-            "tags": knowledge.get("tags", []),
-            "confidence": knowledge.get("confidence"),
-        }
-    )
-    return result
 
 
 def _process_blog_source(source: dict) -> dict[str, Any]:
@@ -285,21 +207,13 @@ def main() -> None:
     logger.info("=" * 60)
     logger.info("AgentDB Knowledge Scraper — starting run")
     logger.info(
-        "Sources: %d YouTube channels, %d blogs, %d podcasts",
-        len(YOUTUBE_SOURCES),
+        "Sources: %d blogs, %d podcasts",
         len(BLOG_SOURCES),
         len(PODCAST_SOURCES),
     )
     logger.info("=" * 60)
 
     all_results: List[Dict[str, Any]] = []
-
-    # --- YouTube ---
-    for source in YOUTUBE_SOURCES:
-        result = _process_youtube_source(source)
-        all_results.append(result)
-        status = "OK" if result["success"] else f"FAIL ({result.get('error', '?')})"
-        logger.info("[YouTube] %s → %s", source["name"], status)
 
     # --- Podcasts ---
     for source in PODCAST_SOURCES:
