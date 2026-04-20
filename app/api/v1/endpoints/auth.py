@@ -82,7 +82,7 @@ async def upgrade_key(
     db=Depends(get_db),
 ):
     """Admin endpoint — upgrade an API key's tier."""
-    if secret != settings.ADMIN_SECRET.strip():
+    if secret != settings.effective_admin_secret:
         raise HTTPException(status_code=403, detail="Invalid admin secret")
 
     if tier not in ("trial", "pro", "fleet"):
@@ -108,7 +108,7 @@ async def run_migration(
     db=Depends(get_db),
 ):
     """Admin endpoint — run pending DB migrations."""
-    if secret != settings.ADMIN_SECRET.strip():
+    if secret != settings.effective_admin_secret:
         raise HTTPException(status_code=403, detail="Invalid admin secret")
 
     migrations = []
@@ -129,7 +129,7 @@ async def get_stats(
     db=Depends(get_db),
 ):
     """Admin endpoint — subscriber counts and usage stats."""
-    if secret != settings.ADMIN_SECRET.strip():
+    if secret != settings.effective_admin_secret:
         raise HTTPException(status_code=403, detail="Invalid admin secret")
 
     tiers = await db.fetch_all(

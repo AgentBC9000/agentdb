@@ -48,8 +48,17 @@ class Settings(BaseSettings):
     RATE_LIMIT_BASIC: int = 1000
     RATE_LIMIT_PRO: int = 99999
 
-    # Admin
-    ADMIN_SECRET: str = "change-me-in-production"
+    # Admin — accepts either ADMIN_SECRET or AGENTDB_ADMIN_SECRET (shared var alias)
+    ADMIN_SECRET: str = ""
+    AGENTDB_ADMIN_SECRET: str = ""
+
+    @property
+    def effective_admin_secret(self) -> str:
+        """Return whichever admin secret env var is populated, in priority order."""
+        for candidate in (self.ADMIN_SECRET, self.AGENTDB_ADMIN_SECRET):
+            if candidate and candidate.strip() and candidate.strip() != "change-me-in-production":
+                return candidate.strip()
+        return "change-me-in-production"
 
     class Config:
         env_file = ".env"
