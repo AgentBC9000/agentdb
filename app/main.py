@@ -62,8 +62,11 @@ async def health():
 @app.get("/debug/db")
 async def debug_db():
     """Temporary: reveal which DB the app is connected to."""
-    url = settings.DATABASE_URL
-    # Mask password but show host/db
     import re
-    masked = re.sub(r":([^@]+)@", ":***@", url)
-    return {"database_url": masked}
+    def mask(url):
+        return re.sub(r":([^@]+)@", ":***@", url) if url else "(empty)"
+    return {
+        "AGENTDB_DATABASE_URL": mask(settings.AGENTDB_DATABASE_URL),
+        "DATABASE_URL": mask(settings.DATABASE_URL),
+        "using": mask(settings.AGENTDB_DATABASE_URL or settings.DATABASE_URL),
+    }

@@ -12,7 +12,8 @@ class Settings(BaseSettings):
     SUPABASE_URL: str = ""
     SUPABASE_KEY: str = ""
     SUPABASE_SERVICE_KEY: str = ""
-    DATABASE_URL: str = ""
+    DATABASE_URL: str = ""        # kept for legacy
+    AGENTDB_DATABASE_URL: str = ""  # preferred — avoids Railway plugin injection
 
     # Redis (Upstash)
     REDIS_URL: str = "redis://localhost:6379"

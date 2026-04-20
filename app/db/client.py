@@ -59,7 +59,9 @@ async def get_db():
 
 async def connect_db():
     global _pool
-    dsn = _clean_db_url(settings.DATABASE_URL)
+    # Prefer AGENTDB_DATABASE_URL to avoid conflicts with Railway-injected DATABASE_URL
+    raw_url = settings.AGENTDB_DATABASE_URL or settings.DATABASE_URL
+    dsn = _clean_db_url(raw_url)
     _pool = await asyncpg.create_pool(
         dsn,
         statement_cache_size=0,   # Required for Supabase PgBouncer transaction mode
