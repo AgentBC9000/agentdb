@@ -33,10 +33,18 @@ async def register(payload: RegisterRequest, db=Depends(get_db)):
     trial_expiry = get_trial_expiry()
 
     try:
-        await db.execute(
-            "INSERT INTO agents (id, email, name) VALUES (:id, :email, :name)",
-            {"id": agent_id, "email": payload.email, "name": payload.name}
+        # If email already exists (partial record), reuse that agent_id
+        existing = await db.fetch_one(
+            "SELECT id FROM agents WHERE email = :email",
+            {"email": payload.email}
         )
+        if existing:
+            agent_id = str(existing["id"])
+        else:
+            await db.execute(
+                "INSERT INTO agents (id, email, name) VALUES (:id, :email, :name)",
+                {"id": agent_id, "email": payload.email, "name": payload.name}
+            )
     except Exception as e:
         print(f"REGISTER ERROR agents INSERT: {type(e).__name__}: {e}\n{tb.format_exc()}", file=sys.stderr, flush=True)
         raise HTTPException(status_code=500, detail=f"agents insert failed: {type(e).__name__}: {e}")
