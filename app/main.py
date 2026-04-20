@@ -70,3 +70,18 @@ async def debug_db():
         "DATABASE_URL": mask(settings.DATABASE_URL),
         "using": mask(settings.AGENTDB_DATABASE_URL or settings.DATABASE_URL),
     }
+
+
+@app.get("/debug/auth")
+async def debug_auth():
+    """Temporary: show masked admin secret so we can confirm which value Railway is serving."""
+    import os
+    from app.core.config import get_admin_secret
+    resolved = get_admin_secret()
+    def mask(v):
+        return v[:4] + "***" if v and len(v) > 4 else "(empty or short)"
+    return {
+        "ADMIN_SECRET_raw": mask(os.environ.get("ADMIN_SECRET", "")),
+        "AGENTDB_ADMIN_SECRET_raw": mask(os.environ.get("AGENTDB_ADMIN_SECRET", "")),
+        "resolved": mask(resolved),
+    }
