@@ -26,27 +26,36 @@ class RegisterResponse(BaseModel):
 
 @router.post("/register", response_model=RegisterResponse)
 async def register(payload: RegisterRequest, db=Depends(get_db)):
+    import sys, traceback as tb
     agent_id = str(uuid.uuid4())
     raw_key, hashed_key = generate_api_key()
     key_prefix = raw_key[:12]
     trial_expiry = get_trial_expiry()
 
-    await db.execute(
-        "INSERT INTO agents (id, email, name) VALUES (:id, :email, :name)",
-        {"id": agent_id, "email": payload.email, "name": payload.name}
-    )
+    try:
+        await db.execute(
+            "INSERT INTO agents (id, email, name) VALUES (:id, :email, :name)",
+            {"id": agent_id, "email": payload.email, "name": payload.name}
+        )
+    except Exception as e:
+        print(f"REGISTER ERROR agents INSERT: {type(e).__name__}: {e}\n{tb.format_exc()}", file=sys.stderr, flush=True)
+        raise HTTPException(status_code=500, detail=f"agents insert failed: {type(e).__name__}: {e}")
 
-    await db.execute(
-        """INSERT INTO api_keys
-           (agent_id, key_hash, key_prefix, tier, trial_expires_at)
-           VALUES (:agent_id, :key_hash, :key_prefix, 'trial', :trial_expires_at)""",
-        {
-            "agent_id": agent_id,
-            "key_hash": hashed_key,
-            "key_prefix": key_prefix,
-            "trial_expires_at": trial_expiry,
-        }
-    )
+    try:
+        await db.execute(
+            """INSERT INTO api_keys
+               (agent_id, key_hash, key_prefix, tier, trial_expires_at)
+               VALUES (:agent_id, :key_hash, :key_prefix, 'trial', :trial_expires_at)""",
+            {
+                "agent_id": agent_id,
+                "key_hash": hashed_key,
+                "key_prefix": key_prefix,
+                "trial_expires_at": trial_expiry,
+            }
+        )
+    except Exception as e:
+        print(f"REGISTER ERROR api_keys INSERT: {type(e).__name__}: {e}\n{tb.format_exc()}", file=sys.stderr, flush=True)
+        raise HTTPException(status_code=500, detail=f"api_keys insert failed: {type(e).__name__}: {e}")
 
     return RegisterResponse(
         api_key=raw_key,
