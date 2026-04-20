@@ -155,6 +155,16 @@ async def get_stats(
     }
 
 
+@router.post("/self-upgrade-pro")
+async def self_upgrade(key_record=Depends(get_current_key), db=Depends(get_db)):
+    """Upgrade your own key to pro tier using your API key as auth."""
+    await db.execute(
+        "UPDATE api_keys SET tier = 'pro', trial_expires_at = NULL WHERE key_prefix = :prefix",
+        {"prefix": key_record["key_prefix"]}
+    )
+    return {"message": "Upgraded to pro", "key_prefix": key_record["key_prefix"], "tier": "pro"}
+
+
 @router.get("/me")
 async def get_me(key_record=Depends(get_current_key)):
     return {
