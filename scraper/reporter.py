@@ -1,37 +1,32 @@
 """
 AgentDB Knowledge Scraper — Reporter
-Sends a plain-text email summary of the scraper run via Gmail SMTP.
+Sends a plain-text email summary of the scraper run via Resend HTTP API.
+
+Required env vars:
+    RESEND_API_KEY   — from resend.com (free tier, 3k emails/month)
+    REPORT_EMAIL     — recipient address
 """
 
 import logging
 import os
-import smtplib
 from datetime import datetime, timezone
-from email.mime.text import MIMEText
 from typing import Any, Dict, List, Optional
+
+import httpx
 
 logger = logging.getLogger(__name__)
 
-SMTP_HOST = "smtp.gmail.com"
-SMTP_PORT = 587
+RESEND_API_URL = "https://api.resend.com/emails"
+FROM_ADDRESS = "AgentDB Scraper <onboarding@resend.dev>"
 
 
 def _get_config() -> Optional[Dict]:
-    """
-    Read required environment variables for email sending.
-
-    Returns:
-        Config dict or None if any required variable is missing.
-    """
-    gmail_user = os.environ.get("GMAIL_USER", "").strip()
-    gmail_password = os.environ.get("GMAIL_APP_PASSWORD", "").strip()
+    resend_api_key = os.environ.get("RESEND_API_KEY", "").strip()
     report_email = os.environ.get("REPORT_EMAIL", "").strip()
 
     missing = []
-    if not gmail_user:
-        missing.append("GMAIL_USER")
-    if not gmail_password:
-        missing.append("GMAIL_APP_PASSWORD")
+    if not resend_api_key:
+        missing.append("RESEND_API_KEY")
     if not report_email:
         missing.append("REPORT_EMAIL")
 
@@ -39,25 +34,10 @@ def _get_config() -> Optional[Dict]:
         logger.error("Cannot send report — missing env vars: %s", ", ".join(missing))
         return None
 
-    return {
-        "gmail_user": gmail_user,
-        "gmail_password": gmail_password,
-        "report_email": report_email,
-    }
+    return {"resend_api_key": resend_api_key, "report_email": report_email}
 
 
 def _build_report_body(results: List[Dict[str, Any]]) -> str:
-    """
-    Render the plain-text email body from the list of run results.
-
-    Each result dict should contain:
-        - source_name (str)
-        - content_type (str): "youtube" or "blog"
-        - success (bool)
-        - title (str, optional): title of ingested content
-        - url (str, optional)
-        - error (str, optional): failure reason
-    """
     now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     total = len(results)
     succeeded = [r for r in results if r.get("success")]
@@ -73,7 +53,6 @@ def _build_report_body(results: List[Dict[str, Any]]) -> str:
         "",
     ]
 
-    # --- Successes ---
     if succeeded:
         lines.append("INGESTED")
         lines.append("-" * 50)
@@ -95,7 +74,6 @@ def _build_report_body(results: List[Dict[str, Any]]) -> str:
                 lines.append(f"    Confidence: {confidence:.2f}")
             lines.append("")
 
-    # --- Failures ---
     if failed:
         lines.append("FAILED")
         lines.append("-" * 50)
@@ -108,20 +86,11 @@ def _build_report_body(results: List[Dict[str, Any]]) -> str:
             lines.append("")
 
     lines.append("=" * 50)
-    lines.append("This report was generated automatically by AgentDB Scraper.")
+    lines.append("AgentDB Scraper — automated report")
     return "\n".join(lines)
 
 
 def send_report(results: List[Dict[str, Any]]) -> bool:
-    """
-    Send the run report email via Gmail SMTP.
-
-    Args:
-        results: List of result dicts — one per source processed.
-
-    Returns:
-        True if the email was sent successfully, False otherwise.
-    """
     config = _get_config()
     if config is None:
         return False
@@ -129,49 +98,32 @@ def send_report(results: List[Dict[str, Any]]) -> bool:
     now_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     succeeded_count = sum(1 for r in results if r.get("success"))
     total_count = len(results)
-    subject = (
-        f"AgentDB Scraper Report {now_date} — "
-        f"{succeeded_count}/{total_count} ingested"
-    )
-
+    subject = f"AgentDB Scraper {now_date} — {succeeded_count}/{total_count} ingested"
     body = _build_report_body(results)
 
-    msg = MIMEText(body, "plain", "utf-8")
-    msg["Subject"] = subject
-    msg["From"] = config["gmail_user"]
-    msg["To"] = config["report_email"]
-
-    logger.info(
-        "Sending report to %s via %s",
-        config["report_email"],
-        config["gmail_user"],
-    )
+    logger.info("Sending report to %s via Resend API", config["report_email"])
 
     try:
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-            server.login(config["gmail_user"], config["gmail_password"])
-            server.sendmail(
-                config["gmail_user"],
-                [config["report_email"]],
-                msg.as_string(),
-            )
-        logger.info("Report email sent successfully.")
-        return True
-
-    except smtplib.SMTPAuthenticationError as exc:
-        logger.error(
-            "Gmail authentication failed. Check GMAIL_USER and GMAIL_APP_PASSWORD. "
-            "Note: GMAIL_APP_PASSWORD must be an App Password, not your account password. "
-            "Error: %s",
-            exc,
+        response = httpx.post(
+            RESEND_API_URL,
+            headers={
+                "Authorization": f"Bearer {config['resend_api_key']}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "from": FROM_ADDRESS,
+                "to": [config["report_email"]],
+                "subject": subject,
+                "text": body,
+            },
+            timeout=15,
         )
-        return False
-    except smtplib.SMTPException as exc:
-        logger.error("SMTP error sending report: %s", exc)
-        return False
+        if response.is_success:
+            logger.info("Report email sent successfully (Resend id: %s)", response.json().get("id"))
+            return True
+        else:
+            logger.error("Resend API error %s: %s", response.status_code, response.text[:300])
+            return False
     except Exception as exc:
-        logger.error("Unexpected error sending report: %s", exc)
+        logger.error("Unexpected error sending report via Resend: %s", exc)
         return False
