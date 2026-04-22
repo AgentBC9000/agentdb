@@ -22,7 +22,7 @@ from ingest import ingest_item
 from podcast_scraper import scrape_podcast_source
 from reporter import send_report
 from sources import BLOG_SOURCES, PODCAST_SOURCES, YOUTUBE_RSS_SOURCES
-from summariser import summarise
+from summariser import CreditExhaustedError, summarise
 
 # ---------------------------------------------------------------------------
 # Logging setup
@@ -81,6 +81,8 @@ def _process_blog_source(source: dict) -> dict[str, Any]:
             source_name=name,
             category=category,
         )
+    except CreditExhaustedError:
+        raise  # propagate — main loop will abort and report immediately
     except Exception as exc:
         logger.error("[Blog] Unhandled error summarising %s: %s", name, exc)
         result["error"] = f"Summarise exception: {exc}"
@@ -155,6 +157,8 @@ def _process_podcast_source(source: dict) -> dict[str, Any]:
             source_name=name,
             category=category,
         )
+    except CreditExhaustedError:
+        raise  # propagate — main loop will abort and report immediately
     except Exception as exc:
         logger.error("[Podcast] Unhandled error summarising %s: %s", name, exc)
         result["error"] = f"Summarise exception: {exc}"
@@ -216,27 +220,33 @@ def main() -> None:
 
     all_results: List[Dict[str, Any]] = []
 
-    # --- Podcasts ---
-    for source in PODCAST_SOURCES:
-        result = _process_podcast_source(source)
-        all_results.append(result)
-        status = "OK" if result["success"] else f"FAIL ({result.get('error', '?')})"
-        logger.info("[Podcast] %s → %s", source["name"], status)
+    try:
+        # --- Podcasts ---
+        for source in PODCAST_SOURCES:
+            result = _process_podcast_source(source)
+            all_results.append(result)
+            status = "OK" if result["success"] else f"FAIL ({result.get('error', '?')})"
+            logger.info("[Podcast] %s → %s", source["name"], status)
 
-    # --- Blogs ---
-    for source in BLOG_SOURCES:
-        result = _process_blog_source(source)
-        all_results.append(result)
-        status = "OK" if result["success"] else f"FAIL ({result.get('error', '?')})"
-        logger.info("[Blog] %s → %s", source["name"], status)
+        # --- Blogs ---
+        for source in BLOG_SOURCES:
+            result = _process_blog_source(source)
+            all_results.append(result)
+            status = "OK" if result["success"] else f"FAIL ({result.get('error', '?')})"
+            logger.info("[Blog] %s → %s", source["name"], status)
 
-    # --- YouTube RSS (description-based) ---
-    for source in YOUTUBE_RSS_SOURCES:
-        result = _process_blog_source(source)
-        result["content_type"] = "youtube_rss"
-        all_results.append(result)
-        status = "OK" if result["success"] else f"FAIL ({result.get('error', '?')})"
-        logger.info("[YouTube] %s → %s", source["name"], status)
+        # --- YouTube RSS (description-based) ---
+        for source in YOUTUBE_RSS_SOURCES:
+            result = _process_blog_source(source)
+            result["content_type"] = "youtube_rss"
+            all_results.append(result)
+            status = "OK" if result["success"] else f"FAIL ({result.get('error', '?')})"
+            logger.info("[YouTube] %s → %s", source["name"], status)
+
+    except CreditExhaustedError as exc:
+        logger.error("ABORTING — Anthropic credits exhausted after %d sources: %s", len(all_results), exc)
+        send_report(all_results, abort_reason=str(exc))
+        sys.exit(1)
 
     # --- Summary ---
     succeeded = sum(1 for r in all_results if r["success"])

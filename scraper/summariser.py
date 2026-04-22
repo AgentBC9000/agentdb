@@ -12,7 +12,12 @@ import anthropic
 
 logger = logging.getLogger(__name__)
 
-MODEL = "claude-opus-4-5"
+
+class CreditExhaustedError(Exception):
+    """Raised when the Anthropic API rejects a call due to exhausted credits/billing."""
+
+
+MODEL = "claude-sonnet-4-5"
 MAX_INPUT_CHARS = 80_000  # ~20k tokens; truncate beyond this to stay within context
 
 SYSTEM_PROMPT = """\
@@ -180,6 +185,13 @@ def summarise(
         logger.error("Rate limit exceeded calling Claude API: %s", exc)
         return None
     except anthropic.APIStatusError as exc:
+        msg = str(exc.message).lower()
+        if exc.status_code in (400, 402, 429) and any(
+            kw in msg for kw in ("credit", "billing", "balance", "quota", "insufficient")
+        ):
+            raise CreditExhaustedError(
+                f"Anthropic credits exhausted (status {exc.status_code}): {exc.message}"
+            ) from exc
         logger.error("Claude API error (status %s): %s", exc.status_code, exc.message)
         return None
     except Exception as exc:

@@ -37,7 +37,7 @@ def _get_config() -> Optional[Dict]:
     return {"resend_api_key": resend_api_key, "report_email": report_email}
 
 
-def _build_report_body(results: List[Dict[str, Any]]) -> str:
+def _build_report_body(results: List[Dict[str, Any]], abort_reason: Optional[str] = None) -> str:
     now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     total = len(results)
     succeeded = [r for r in results if r.get("success")]
@@ -52,6 +52,12 @@ def _build_report_body(results: List[Dict[str, Any]]) -> str:
         f"Failed:                  {len(failed)}",
         "",
     ]
+
+    if abort_reason:
+        lines.insert(3, "")
+        lines.insert(3, f"⚠️  RUN ABORTED EARLY: {abort_reason}")
+        lines.insert(3, "")
+
 
     if succeeded:
         lines.append("INGESTED")
@@ -90,7 +96,7 @@ def _build_report_body(results: List[Dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-def send_report(results: List[Dict[str, Any]]) -> bool:
+def send_report(results: List[Dict[str, Any]], abort_reason: Optional[str] = None) -> bool:
     config = _get_config()
     if config is None:
         return False
@@ -98,8 +104,12 @@ def send_report(results: List[Dict[str, Any]]) -> bool:
     now_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     succeeded_count = sum(1 for r in results if r.get("success"))
     total_count = len(results)
-    subject = f"AgentDB Scraper {now_date} — {succeeded_count}/{total_count} ingested"
-    body = _build_report_body(results)
+    subject = (
+        f"⚠️ AgentDB Scraper {now_date} — ABORTED (credits exhausted)"
+        if abort_reason
+        else f"AgentDB Scraper {now_date} — {succeeded_count}/{total_count} ingested"
+    )
+    body = _build_report_body(results, abort_reason=abort_reason)
 
     logger.info("Sending report to %s via Resend API", config["report_email"])
 
