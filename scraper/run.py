@@ -246,7 +246,7 @@ def main() -> None:
     except CreditExhaustedError as exc:
         logger.error("ABORTING — Anthropic credits exhausted after %d sources: %s", len(all_results), exc)
         send_report(all_results, abort_reason=str(exc))
-        sys.exit(1)
+        sys.exit(0)  # graceful abort — not a crash
 
     # --- Summary ---
     succeeded = sum(1 for r in all_results if r["success"])
