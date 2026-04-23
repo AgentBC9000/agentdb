@@ -181,6 +181,11 @@ BLOG_SOURCES = [
         "rss_url": "https://fs.blog/feed/",
         "category": "market_news_alternative",
     },
+    {
+        "name": "Asymco",
+        "rss_url": "https://asymco.com/feed/",
+        "category": "market_news_alternative",
+    },
     # ── Emerging Markets ─────────────────────────────────────────────────────
     {
         "name": "Rest of World",
