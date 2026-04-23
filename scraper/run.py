@@ -20,6 +20,7 @@ Required environment variables:
 """
 
 import logging
+import re
 import sys
 from typing import Any
 
@@ -47,6 +48,19 @@ logging.basicConfig(
     stream=sys.stdout,
 )
 logger = logging.getLogger("agentdb.scraper")
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _make_custom_id(prefix: str, name: str) -> str:
+    """
+    Build a batch custom_id that satisfies Anthropic's pattern ^[a-zA-Z0-9_-]{1,64}$.
+    Spaces → underscores, all other non-alphanumeric chars stripped, truncated to 64.
+    """
+    raw = f"{prefix}__{name.replace(' ', '_')}"
+    return re.sub(r"[^a-zA-Z0-9_-]", "", raw)[:64]
 
 
 # ---------------------------------------------------------------------------
@@ -88,7 +102,7 @@ def _scrape_podcasts() -> tuple[list[dict], list[dict[str, Any]]]:
                            "success": False, "error": f"Content too short ({len(text)} chars) — stub or paywall"})
             continue
 
-        custom_id = f"podcast__{name.replace(' ', '_')}"
+        custom_id = _make_custom_id("podcast", name)
         scraped.append({
             "custom_id": custom_id,
             "scraped": data,
@@ -135,7 +149,7 @@ def _scrape_blogs() -> tuple[list[dict], list[dict[str, Any]]]:
                            "success": False, "error": f"Content too short ({len(text)} chars) — stub or paywall"})
             continue
 
-        custom_id = f"blog__{name.replace(' ', '_')}"
+        custom_id = _make_custom_id("blog", name)
         scraped.append({
             "custom_id": custom_id,
             "scraped": data,
@@ -181,7 +195,7 @@ def _scrape_youtube() -> tuple[list[dict], list[dict[str, Any]]]:
                            "success": False, "error": f"Content too short ({len(text)} chars)"})
             continue
 
-        custom_id = f"youtube__{name.replace(' ', '_')}"
+        custom_id = _make_custom_id("youtube", name)
         scraped.append({
             "custom_id": custom_id,
             "scraped": data,
