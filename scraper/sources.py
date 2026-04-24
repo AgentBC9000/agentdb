@@ -110,11 +110,36 @@ BLOG_SOURCES = [
         "category": "technology_ai",
     },
     {
+        "name": "Import AI",
+        "rss_url": "https://importai.substack.com/feed",
+        "category": "technology_ai",
+    },
+    {
+        "name": "Benedict Evans",
+        "rss_url": "https://www.ben-evans.com/benedictevans?format=rss",
+        "category": "technology_ai",
+    },
+    {
+        "name": "TLDR Tech",
+        "rss_url": "https://tldr.tech/api/rss/tech",
+        "category": "technology_ai",
+    },
+    {
+        "name": "arXiv AI",
+        "rss_url": "https://export.arxiv.org/rss/cs.AI",
+        "category": "research_ai",
+    },
+    {
         "name": "Hacker News",
         "rss_url": "https://hnrss.org/frontpage?link=comments",
         "category": "startups_ipo",
     },
     # ── Startups / IPO ───────────────────────────────────────────────────────
+    {
+        "name": "The Generalist",
+        "rss_url": "https://www.generalist.com/feed",
+        "category": "startups_ipo",
+    },
     {
         "name": "Y Combinator Blog",
         "rss_url": "https://www.ycombinator.com/blog/rss.xml",
@@ -185,6 +210,22 @@ BLOG_SOURCES = [
         "name": "Asymco",
         "rss_url": "https://asymco.com/feed/",
         "category": "market_news_alternative",
+    },
+    {
+        "name": "Marginal Revolution",
+        "rss_url": "https://marginalrevolution.com/feed",
+        "category": "market_news_alternative",
+    },
+    # ── Policy / Regulation ──────────────────────────────────────────────────
+    {
+        "name": "Politico Europe",
+        "rss_url": "https://www.politico.eu/feed/",
+        "category": "policy_regulation",
+    },
+    {
+        "name": "arXiv Policy",
+        "rss_url": "https://export.arxiv.org/rss/cs.CY",
+        "category": "policy_regulation",
     },
     # ── Emerging Markets ─────────────────────────────────────────────────────
     {
