@@ -1,6 +1,6 @@
 # AgentDB — Example Agents
 
-Three working agents you can copy-paste and run in under 5 minutes.
+Seven working agents you can copy-paste and run in under 5 minutes.
 
 Get a free API key first:
 ```bash
@@ -128,11 +128,12 @@ See the [main README](../README.md) for full setup instructions.
 
 ## What AgentDB provides
 
-Updated **Mon / Wed / Fri at 07:00 UTC** from 14 curated sources:
+Updated **Mon / Wed / Fri at 07:00 UTC** from 31 curated sources across AI/tech, startups, alternative markets, and emerging markets (Africa & Asia):
 
-- Bloomberg, CNBC, Reuters, Prof G Markets, Rebel Capitalist
-- Lex Fridman, Y Combinator
-- Closer To Truth, Bernardo Kastrup
-- Hacker News, Ars Technica, Quanta Magazine, Marginal Revolution, Zero Hedge
+**Podcasts** — Lex Fridman, Dwarkesh, Hard Fork, This Week in Tech, Acquired, How I Built This, All-In, Prof G Markets
+
+**Blogs** — MIT Tech Review, Ars Technica, TechCrunch, The Verge, Y Combinator Blog, Hacker News, Zero Hedge, Wolf Street, Asymco, The Big Picture, A Wealth of Common Sense, The Daily Upside, Farnam Street, Entrepreneur, IEEE Spectrum, The Hindu Business Line, Mint (India), Rest of World, TechCabal, Techpoint Africa, How We Made It In Africa
+
+**YouTube** — Y Combinator
 
 Full source list: `GET https://agentdb-production-9ba0.up.railway.app/v1/knowledge/sources`

@@ -2,7 +2,7 @@
 
 **Real-time curated knowledge API for AI agents.**
 
-AgentDB is a knowledge base updated Mon/Wed/Fri with summaries from 14 sources spanning markets, technology, science, philosophy, and current events. Connect it to your AI agent so it always has fresh context — without you having to manage scraping, summarisation, or storage.
+AgentDB is a knowledge base updated Mon/Wed/Fri with summaries from 31 curated sources spanning AI/tech, startups, alternative markets, and emerging markets (Africa & Asia). Connect it to your AI agent so it always has fresh context — without you having to manage scraping, summarisation, or storage.
 
 ---
 
@@ -181,31 +181,55 @@ X-API-Key: adb_xxxxxxxxxxxxxxxxxxxx
 
 ## Sources
 
-AgentDB ingests from 14 sources, updated Mon/Wed/Fri at 07:00 UTC.
+AgentDB ingests from 31 sources, updated Mon/Wed/Fri at 07:00 UTC.
 
-**YouTube channels** (video summaries)
+Focus: AI/tech, startups/IPO, alternative markets, and emerging markets (Africa & Asia). No legacy wire services.
 
-| Source | Category |
-|--------|----------|
-| Bloomberg | market_news |
-| CNBC | market_news |
-| Reuters | market_news |
-| Prof G Markets | market_news |
-| Rebel Capitalist | market_news_alternative |
-| Lex Fridman | technology_ai |
-| Y Combinator | startups_technology |
-| Closer To Truth | philosophy_science |
-| Bernardo Kastrup | philosophy_science |
-
-**Blogs / RSS** (article summaries)
+**Podcasts (8)**
 
 | Source | Category |
 |--------|----------|
-| Hacker News | technology_startups |
-| Ars Technica | technology_science |
-| Quanta Magazine | science_research |
-| Marginal Revolution | economics_policy |
+| Lex Fridman Podcast | technology_ai |
+| Dwarkesh Podcast | technology_ai |
+| Hard Fork | technology_ai |
+| This Week in Tech | technology_ai |
+| Acquired | startups_ipo |
+| How I Built This | startups_ipo |
+| All-In Podcast | market_news_alternative |
+| Prof G Markets Podcast | market_news_alternative |
+
+**Blogs (22)**
+
+| Source | Category |
+|--------|----------|
+| MIT Technology Review | technology_ai |
+| Ars Technica | technology_ai |
+| IEEE Spectrum | technology_ai |
+| Hacker News | startups_ipo |
+| Y Combinator Blog | startups_ipo |
+| The Verge | startups_ipo |
+| Entrepreneur | startups_ipo |
+| TechCrunch | startups_ipo |
+| The Hindu Business Line | emerging_markets_asia |
+| Mint (India) | emerging_markets_asia |
 | Zero Hedge | market_news_alternative |
+| Wolf Street | market_news_alternative |
+| Econbrowser | market_news_alternative |
+| A Wealth of Common Sense | market_news_alternative |
+| The Big Picture (Ritholtz) | market_news_alternative |
+| Farnam Street | market_news_alternative |
+| Asymco | market_news_alternative |
+| The Daily Upside | market_news |
+| Rest of World | emerging_markets |
+| TechCabal | emerging_markets_africa |
+| Techpoint Africa | emerging_markets_africa |
+| How We Made It In Africa | emerging_markets_africa |
+
+**YouTube RSS (1)**
+
+| Source | Category |
+|--------|----------|
+| Y Combinator | startups_ipo |
 
 Full machine-readable list: `GET /v1/knowledge/sources`
 
