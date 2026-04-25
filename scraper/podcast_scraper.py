@@ -24,6 +24,8 @@ try:
 except ImportError:
     raise ImportError("Install feedparser:  pip install feedparser")
 
+from podcast_transcript import fetch_transcript, find_transcript_url
+
 logger = logging.getLogger(__name__)
 
 # Minimum text length to consider usable content (show notes alone are often short)
@@ -87,6 +89,7 @@ def _parse_rss(rss_url: str) -> Optional[dict]:
         "show_notes": show_notes,
         "published_at": pub_date,
         "podcast_name": feed.feed.get("title", ""),
+        "_entry": entry,   # raw feedparser entry — used for transcript detection
     }
 
 
@@ -152,9 +155,23 @@ def scrape_podcast_source(source: dict) -> Optional[dict]:
 
     logger.info("[Podcast] Latest episode: %s", episode["title"])
 
-    # 2. Try to get full transcript from episode page
+    # 2a. Check RSS entry for <podcast:transcript> tag (Podcasting 2.0)
     transcript = None
-    if transcript_selectors and episode.get("url"):
+    raw_entry = episode.pop("_entry", {})
+    transcript_ref = find_transcript_url(raw_entry)
+    if transcript_ref:
+        t_url, t_type = transcript_ref
+        logger.info("[Podcast] RSS transcript tag found for %s: %s", name, t_url)
+        transcript = fetch_transcript(t_url, t_type)
+        if transcript:
+            logger.info(
+                "[Podcast] RSS transcript fetched for %s (%d chars)", name, len(transcript)
+            )
+        else:
+            logger.warning("[Podcast] RSS transcript fetch failed for %s — falling back", name)
+
+    # 2b. Try to scrape transcript from episode web page (existing CSS selector logic)
+    if not transcript and transcript_selectors and episode.get("url"):
         transcript = _fetch_transcript_from_page(episode["url"], transcript_selectors)
 
     # 3. Build content text
