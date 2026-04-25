@@ -52,6 +52,13 @@ PODCAST_SOURCES = [
             "article",
         ],
     },
+    {
+        "name": "The Tech Report",
+        "rss_url": "https://feeds.acast.com/public/shows/6981ee67d77e5e94dcca521a",
+        "category": "technology_ai",
+        "hosts": [],
+        "transcript_selectors": [],
+    },
     # ── Startups / IPO ───────────────────────────────────────────────────────
     {
         "name": "Acquired",
