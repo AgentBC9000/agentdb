@@ -262,6 +262,21 @@ def _ingest_item(item: dict, knowledge: dict) -> dict[str, Any]:
         }.items() if v is not None
     }
 
+    # ── Confidence gate — reject low-quality summaries before ingesting ──────
+    MIN_CONFIDENCE = 0.55
+    confidence = knowledge.get("confidence", 0.0)
+    if confidence < MIN_CONFIDENCE:
+        logger.warning(
+            "[Quality] Skipping %s — confidence %.2f below threshold %.2f",
+            name, confidence, MIN_CONFIDENCE,
+        )
+        return {
+            "source_name": name,
+            "content_type": content_type,
+            "success": False,
+            "error": f"Low confidence ({confidence:.2f}) — content too thin or garbled",
+        }
+
     # Always attach token metadata so ingest.py can pack it into body
     knowledge["_token_meta"] = token_meta
 

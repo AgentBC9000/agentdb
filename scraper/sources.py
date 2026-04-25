@@ -52,13 +52,6 @@ PODCAST_SOURCES = [
             "article",
         ],
     },
-    {
-        "name": "The Tech Report",
-        "rss_url": "https://feeds.acast.com/public/shows/6981ee67d77e5e94dcca521a",
-        "category": "technology_ai",
-        "hosts": [],
-        "transcript_selectors": [],
-    },
     # ── Startups / IPO ───────────────────────────────────────────────────────
     {
         "name": "Acquired",
@@ -123,8 +116,8 @@ BLOG_SOURCES = [
         "rss_text_mode": True,  # Substack full-post content is in the RSS entry
     },
     {
-        "name": "Benedict Evans",
-        "rss_url": "https://www.ben-evans.com/benedictevans?format=rss",
+        "name": "Platformer",
+        "rss_url": "https://www.platformer.news/feed",
         "category": "technology_ai",
     },
     {
@@ -141,9 +134,9 @@ BLOG_SOURCES = [
         "rss_text_mode": True,  # Paper abstract is in the RSS entry
     },
     {
-        "name": "Hacker News",
-        "rss_url": "https://hnrss.org/frontpage?link=comments",
-        "category": "startups_ipo",
+        "name": "404 Media",
+        "rss_url": "https://www.404media.co/feed",
+        "category": "technology_ai",
     },
     # ── Startups / IPO ───────────────────────────────────────────────────────
     {
@@ -163,8 +156,8 @@ BLOG_SOURCES = [
         "category": "startups_ipo",
     },
     {
-        "name": "IEEE Spectrum",
-        "rss_url": "https://spectrum.ieee.org/rss/fulltext",
+        "name": "Wired",
+        "rss_url": "https://www.wired.com/feed/rss",
         "category": "technology_ai",
     },
     {
@@ -189,8 +182,8 @@ BLOG_SOURCES = [
         "category": "market_news_alternative",
     },
     {
-        "name": "Wolf Street",
-        "rss_url": "https://wolfstreet.com/feed/",
+        "name": "Calculated Risk",
+        "rss_url": "https://feeds.feedburner.com/CalculatedRisk",
         "category": "market_news_alternative",
     },
     {
@@ -214,18 +207,13 @@ BLOG_SOURCES = [
         "category": "market_news",
     },
     {
-        "name": "Farnam Street",
-        "rss_url": "https://fs.blog/feed/",
-        "category": "market_news_alternative",
-    },
-    {
         "name": "Asymco",
         "rss_url": "https://asymco.com/feed/",
         "category": "market_news_alternative",
     },
     {
-        "name": "Marginal Revolution",
-        "rss_url": "https://marginalrevolution.com/feed",
+        "name": "Noahpinion",
+        "rss_url": "https://www.noahpinion.blog/feed",
         "category": "market_news_alternative",
     },
     # ── Policy / Regulation ──────────────────────────────────────────────────
@@ -258,8 +246,8 @@ BLOG_SOURCES = [
         "category": "emerging_markets_africa",
     },
     {
-        "name": "How We Made It In Africa",
-        "rss_url": "https://www.howwemadeitinafrica.com/feed/",
+        "name": "Disrupt Africa",
+        "rss_url": "https://disrupt-africa.com/feed/",
         "category": "emerging_markets_africa",
     },
     {
