@@ -55,6 +55,12 @@ def _build_payload(item: dict) -> dict:
     if item.get("video_id"):
         body["video_id"] = item["video_id"]
 
+    # Merge token tracking metadata (raw_chars, input_tokens, output_tokens,
+    # compression_ratio) when present — stored in body JSONB, no schema change needed
+    token_meta = item.pop("_token_meta", None) or {}
+    if token_meta:
+        body.update(token_meta)
+
     return {
         "title": item.get("title", ""),
         "content_type": item.get("content_type", "blog_article"),

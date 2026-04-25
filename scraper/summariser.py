@@ -282,10 +282,20 @@ def poll_batch(batch_id: str) -> dict[str, Optional[dict]]:
                     if isinstance(guests, list)
                     else []
                 )
+                # Capture token usage from the API response
+                usage = getattr(result.result.message, "usage", None)
+                if usage:
+                    validated["_input_tokens"] = getattr(usage, "input_tokens", None)
+                    validated["_output_tokens"] = getattr(usage, "output_tokens", None)
+
                 results[cid] = validated
                 logger.info(
-                    "Batch item %s — confidence=%.2f tags=%s",
-                    cid, validated["confidence"], validated["tags"],
+                    "Batch item %s — confidence=%.2f tags=%s in=%s out=%s tokens",
+                    cid,
+                    validated["confidence"],
+                    validated["tags"],
+                    validated.get("_input_tokens", "?"),
+                    validated.get("_output_tokens", "?"),
                 )
             else:
                 logger.error("Failed to parse JSON for batch item %s", cid)

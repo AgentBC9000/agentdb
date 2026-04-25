@@ -59,6 +59,14 @@ def _build_report_body(results: List[Dict[str, Any]], abort_reason: Optional[str
         lines.insert(3, "")
 
 
+    # Compression summary across all succeeded items
+    ratios = [r["compression_ratio"] for r in succeeded if r.get("compression_ratio")]
+    if ratios:
+        avg_ratio = sum(ratios) / len(ratios)
+        lines.append(f"Avg compression ratio:   {avg_ratio:.1f}× ({len(ratios)} items measured)")
+        lines.append(f"Range:                   {min(ratios):.1f}× – {max(ratios):.1f}×")
+        lines.append("")
+
     if succeeded:
         lines.append("INGESTED")
         lines.append("-" * 50)
@@ -69,6 +77,7 @@ def _build_report_body(results: List[Dict[str, Any]], abort_reason: Optional[str
             url = r.get("url", "")
             tags = ", ".join(r.get("tags", []))
             confidence = r.get("confidence")
+            ratio = r.get("compression_ratio")
 
             lines.append(f"  [{ctype}] {source}")
             lines.append(f"    Title:      {title}")
@@ -78,6 +87,8 @@ def _build_report_body(results: List[Dict[str, Any]], abort_reason: Optional[str
                 lines.append(f"    Tags:       {tags}")
             if confidence is not None:
                 lines.append(f"    Confidence: {confidence:.2f}")
+            if ratio is not None:
+                lines.append(f"    Compression:{ratio:.1f}×")
             lines.append("")
 
     if failed:

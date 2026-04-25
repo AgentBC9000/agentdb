@@ -110,6 +110,7 @@ def _scrape_podcasts() -> tuple[list[dict], list[dict[str, Any]]]:
             "category": source["category"],
             "content_type": "podcast",
             "hosts": source.get("hosts", []),
+            "raw_chars": len(text),
         })
         logger.info("[Podcast] %s scraped OK (%d chars)", name, len(text))
 
@@ -160,6 +161,7 @@ def _scrape_blogs() -> tuple[list[dict], list[dict[str, Any]]]:
             "source_name": name,
             "category": source["category"],
             "content_type": "article",
+            "raw_chars": len(text),
         })
         logger.info("[Blog] %s scraped OK (%d chars)", name, len(text))
 
@@ -206,6 +208,7 @@ def _scrape_youtube() -> tuple[list[dict], list[dict[str, Any]]]:
             "source_name": name,
             "category": source["category"],
             "content_type": "youtube_rss",
+            "raw_chars": len(text),
         })
         logger.info("[YouTube] %s scraped OK (%d chars)", name, len(text))
 
@@ -232,6 +235,36 @@ def _ingest_item(item: dict, knowledge: dict) -> dict[str, Any]:
     knowledge["category"] = item["category"]
     knowledge["content_type"] = content_type
 
+    # ── Token tracking ────────────────────────────────────────────────────────
+    raw_chars = item.get("raw_chars", 0)
+    input_tokens = knowledge.pop("_input_tokens", None)
+    output_tokens = knowledge.pop("_output_tokens", None)
+    # Estimate raw content tokens (4 chars ≈ 1 token for English prose)
+    raw_tokens_est = raw_chars // 4 if raw_chars else None
+    compression_ratio = (
+        round(raw_tokens_est / output_tokens, 1)
+        if raw_tokens_est and output_tokens and output_tokens > 0
+        else None
+    )
+    if compression_ratio:
+        logger.info(
+            "[Token] %s — raw≈%d tok → output=%d tok → %.1f× compression",
+            name, raw_tokens_est, output_tokens, compression_ratio,
+        )
+
+    token_meta = {
+        k: v for k, v in {
+            "raw_chars": raw_chars or None,
+            "raw_tokens_est": raw_tokens_est,
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
+            "compression_ratio": compression_ratio,
+        }.items() if v is not None
+    }
+
+    # Always attach token metadata so ingest.py can pack it into body
+    knowledge["_token_meta"] = token_meta
+
     # Podcasts carry extra metadata in a nested body dict
     if content_type == "podcast":
         knowledge["body"] = {
@@ -239,7 +272,9 @@ def _ingest_item(item: dict, knowledge: dict) -> dict[str, Any]:
             "guests": knowledge.pop("guests", []),
             "audio_url": scraped.get("audio_url", ""),
             "source_name": name,
+            **token_meta,
         }
+        knowledge.pop("_token_meta", None)
 
     try:
         ok = ingest_item(knowledge)
@@ -257,6 +292,7 @@ def _ingest_item(item: dict, knowledge: dict) -> dict[str, Any]:
             "url": scraped.get("url", ""),
             "tags": knowledge.get("tags", []),
             "confidence": knowledge.get("confidence"),
+            "compression_ratio": token_meta.get("compression_ratio"),
         }
     return {"source_name": name, "content_type": content_type,
             "success": False, "error": "AgentDB ingest rejected the item"}
