@@ -120,6 +120,7 @@ BLOG_SOURCES = [
         "name": "Import AI",
         "rss_url": "https://importai.substack.com/feed",
         "category": "technology_ai",
+        "rss_text_mode": True,  # Substack full-post content is in the RSS entry
     },
     {
         "name": "Benedict Evans",
@@ -130,11 +131,14 @@ BLOG_SOURCES = [
         "name": "TLDR Tech",
         "rss_url": "https://tldr.tech/api/rss/tech",
         "category": "technology_ai",
+        # No RSS description — article page scraped instead (Tailwind div layout
+        # handled by _extract_text() body fallback in blog_scraper.py)
     },
     {
         "name": "arXiv AI",
         "rss_url": "https://export.arxiv.org/rss/cs.AI",
         "category": "research_ai",
+        "rss_text_mode": True,  # Paper abstract is in the RSS entry
     },
     {
         "name": "Hacker News",
@@ -146,6 +150,7 @@ BLOG_SOURCES = [
         "name": "The Generalist",
         "rss_url": "https://www.generalist.com/feed",
         "category": "startups_ipo",
+        "rss_text_mode": True,  # Paid newsletter — best content accessible via RSS entry
     },
     {
         "name": "Y Combinator Blog",
@@ -228,11 +233,13 @@ BLOG_SOURCES = [
         "name": "Politico Europe",
         "rss_url": "https://www.politico.eu/feed/",
         "category": "policy_regulation",
+        "rss_text_mode": True,  # Site often blocks scrapers; RSS summary is reliable
     },
     {
         "name": "arXiv Policy",
         "rss_url": "https://export.arxiv.org/rss/cs.CY",
         "category": "policy_regulation",
+        "rss_text_mode": True,  # Paper abstract is in the RSS entry
     },
     # ── Emerging Markets ─────────────────────────────────────────────────────
     {

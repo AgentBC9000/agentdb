@@ -575,6 +575,105 @@
       color: var(--accent);
     }
 
+    /* ── COMPRESSION DEMO ── */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .compare-block {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .compare-label {
+      padding: 10px 16px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .compare-bad {
+      background: rgba(255, 80, 80, 0.08);
+      color: #ff7b72;
+    }
+
+    .compare-good {
+      background: rgba(0, 212, 255, 0.08);
+      color: var(--accent);
+    }
+
+    .compare-pre {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.65;
+      padding: 18px;
+      overflow-x: auto;
+      color: #c9d1d9;
+      white-space: pre-wrap;
+    }
+
+    /* ── SOURCES ── */
+    .source-categories {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .source-cat {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .source-cat-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding-top: 6px;
+    }
+
+    .source-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .source-tag {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 12px;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .source-tag:hover {
+      border-color: var(--accent-border);
+      color: var(--accent);
+    }
+
+    @media (max-width: 700px) {
+      .compare-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .source-cat {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+    }
+
     /* ── FOOTER ── */
     footer {
       border-top: 1px solid var(--border);
@@ -677,18 +776,22 @@
   <nav>
     <div class="nav-inner">
       <div class="nav-logo">Agent<span>DB</span></div>
-      <a href="#pricing" class="btn btn-primary" onclick="openRegister(event)">Start Free Trial</a>
+      <div style="display:flex;align-items:center;gap:20px">
+        <a href="#sources" style="font-size:0.875rem;color:var(--text-dim)">Sources</a>
+        <a href="#pricing" style="font-size:0.875rem;color:var(--text-dim)">Pricing</a>
+        <a href="#pricing" class="btn btn-primary" onclick="openRegister(event)">Start Free Trial</a>
+      </div>
     </div>
   </nav>
 
   <!-- ── HERO ── -->
   <div class="hero">
     <div class="hero-left">
-      <div class="hero-badge">API-first &middot; Real-time &middot; Agent-native</div>
-      <h1>The <span class="accent">knowledge layer</span> for AI agents</h1>
+      <div class="hero-badge">Updated Mon/Wed/Fri &middot; Curated sources &middot; Agent-native</div>
+      <h1>Fresh <span class="accent">RAG context</span> for AI agents</h1>
       <p class="hero-sub">
-        Real-time curated knowledge, structured and compressed for autonomous AI agents.
-        Query exactly what your agent needs — no scraping, no hallucinations, no noise.
+        A curated knowledge base your agent queries at inference time — not training data.
+        Updated three times a week from curated high-signal sources: AI research, startups, alternative markets, and emerging economies. No scraping. No hallucinations.
       </p>
       <div class="hero-ctas">
         <a href="#pricing" class="btn btn-primary" onclick="openRegister(event)">Start Free Trial</a>
@@ -702,19 +805,20 @@
           <div class="code-dots"><span></span><span></span><span></span></div>
           <div class="code-label">QUICK START</div>
         </div>
-        <pre><span class="t-comment"># Query AgentDB from your agent</span>
-<span class="t-cmd">curl</span> <span class="t-flag">-X GET</span> \
-  <span class="t-url">"https://agentdb-production-9ba0.up.railway.app/v1/query"</span> \
-  <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer &lt;your-api-key&gt;"</span> \
-  <span class="t-flag">-H</span> <span class="t-str">"Content-Type: application/json"</span> \
-  <span class="t-flag">-d</span> <span class="t-str">'{"q": "latest AI research papers"}'</span>
+        <pre><span class="t-comment"># Fetch the latest knowledge for your agent</span>
+<span class="t-cmd">curl</span> \
+  <span class="t-url">"https://agentdb-production-9ba0.up.railway.app/v1/knowledge/latest?tags=ai&amp;limit=3"</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"X-API-Key: adb_xxxxxxxxxxxxxxxxxxxx"</span>
 
-<span class="t-comment"># Response — structured, ready to use</span>
+<span class="t-comment"># Response — structured, agent-ready</span>
 <span class="t-brace">{</span>
-  <span class="t-key">"results"</span><span class="t-brace">:</span> <span class="t-brace">[{</span>
-    <span class="t-key">"title"</span><span class="t-brace">:</span>    <span class="t-str">"Attention Is All You Need"</span><span class="t-brace">,</span>
-    <span class="t-key">"summary"</span><span class="t-brace">:</span>  <span class="t-str">"Transformer architecture..."</span><span class="t-brace">,</span>
-    <span class="t-key">"relevance"</span><span class="t-brace">:</span> <span class="t-num">0.97</span>
+  <span class="t-key">"items"</span><span class="t-brace">: [{</span>
+    <span class="t-key">"title"</span><span class="t-brace">:</span>      <span class="t-str">"DeepSeek v4 and the limits of scaling"</span><span class="t-brace">,</span>
+    <span class="t-key">"summary"</span><span class="t-brace">:</span>    <span class="t-str">"DeepSeek's mixture-of-experts approach..."</span><span class="t-brace">,</span>
+    <span class="t-key">"key_points"</span><span class="t-brace">: [</span><span class="t-str">"MoE cuts inference cost 4×"</span><span class="t-brace">, ...]</span><span class="t-brace">,</span>
+    <span class="t-key">"tags"</span><span class="t-brace">:</span>       <span class="t-brace">[</span><span class="t-str">"ai"</span><span class="t-brace">,</span> <span class="t-str">"llm"</span><span class="t-brace">,</span> <span class="t-str">"scaling"</span><span class="t-brace">],</span>
+    <span class="t-key">"confidence"</span><span class="t-brace">:</span> <span class="t-num">0.93</span><span class="t-brace">,</span>
+    <span class="t-key">"source"</span><span class="t-brace">:</span>     <span class="t-str">"Ars Technica"</span>
   <span class="t-brace">}]</span>
 <span class="t-brace">}</span></pre>
       </div>
@@ -745,10 +849,10 @@
         </div>
         <div class="step">
           <div class="step-number">03</div>
-          <h3>Act</h3>
+          <h3>Inject context</h3>
           <p>
-            Feed structured results directly into your agent's context. Less tokens, higher signal,
-            better decisions. Ship faster without building your own data pipeline.
+            Drop the structured summaries into your agent's RAG context. Each item is ~150 tokens
+            vs thousands in the raw source — same signal, fraction of the cost.
           </p>
         </div>
       </div>
@@ -758,59 +862,193 @@
   <!-- ── CODE EXAMPLE ── -->
   <section>
     <div class="section-inner">
-      <div class="section-label">Code examples</div>
-      <h2 class="section-title">Works with any agent stack</h2>
+      <div class="section-label">API reference</div>
+      <h2 class="section-title">Two endpoints. Works with any agent stack.</h2>
       <div class="code-grid">
 
         <div class="code-block">
           <div class="code-header">
             <div class="code-dots"><span></span><span></span><span></span></div>
-            <div class="code-label">REQUEST — cURL</div>
+            <div class="code-label">GET /v1/knowledge/latest — Trial + Pro</div>
           </div>
-          <pre><span class="t-comment"># Register a new agent</span>
-<span class="t-cmd">curl</span> <span class="t-flag">-X POST</span> \
-  <span class="t-url">"https://agentdb-production-9ba0.up.railway.app/v1/auth/register"</span> \
-  <span class="t-flag">-H</span> <span class="t-str">"Content-Type: application/json"</span> \
-  <span class="t-flag">-d</span> <span class="t-str">'{
-    "agent_id": "my-research-agent",
-    "plan":     "trial"
-  }'</span>
+          <pre><span class="t-comment"># Latest items, optionally filtered by tag</span>
+<span class="t-cmd">curl</span> \
+  <span class="t-url">"https://agentdb-production-9ba0.up.railway.app/v1/knowledge/latest"</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"X-API-Key: $AGENTDB_API_KEY"</span>
 
-<span class="t-comment"># Query for knowledge</span>
-<span class="t-cmd">curl</span> <span class="t-flag">-X POST</span> \
-  <span class="t-url">"https://agentdb-production-9ba0.up.railway.app/v1/query"</span> \
-  <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer $API_KEY"</span> \
-  <span class="t-flag">-d</span> <span class="t-str">'{
-    "q":      "recent breakthroughs in LLM reasoning",
-    "limit":  5,
-    "format": "compressed"
-  }'</span></pre>
+<span class="t-comment"># Filter by tag and page size</span>
+<span class="t-cmd">curl</span> \
+  <span class="t-url">"…/v1/knowledge/latest?tags=ai,startups&amp;limit=10"</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"X-API-Key: $AGENTDB_API_KEY"</span>
+
+<span class="t-comment"># Semantic search (Pro key required)</span>
+<span class="t-cmd">curl</span> \
+  <span class="t-url">"…/v1/knowledge/search?q=LLM+reasoning+breakthroughs&amp;limit=5"</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"X-API-Key: $AGENTDB_API_KEY"</span></pre>
         </div>
 
         <div class="code-block">
           <div class="code-header">
             <div class="code-dots"><span></span><span></span><span></span></div>
-            <div class="code-label">RESPONSE — JSON</div>
+            <div class="code-label">RESPONSE — structured item</div>
           </div>
           <pre><span class="t-brace">{</span>
-  <span class="t-key">"status"</span><span class="t-brace">:</span>   <span class="t-str">"ok"</span><span class="t-brace">,</span>
-  <span class="t-key">"query"</span><span class="t-brace">:</span>   <span class="t-str">"recent breakthroughs in LLM reasoning"</span><span class="t-brace">,</span>
-  <span class="t-key">"count"</span><span class="t-brace">:</span>   <span class="t-num">5</span><span class="t-brace">,</span>
-  <span class="t-key">"results"</span><span class="t-brace">: [</span>
-    <span class="t-brace">{</span>
-      <span class="t-key">"id"</span><span class="t-brace">:</span>         <span class="t-str">"kb_8f2a1c"</span><span class="t-brace">,</span>
-      <span class="t-key">"title"</span><span class="t-brace">:</span>      <span class="t-str">"Chain-of-Thought Prompting"</span><span class="t-brace">,</span>
-      <span class="t-key">"summary"</span><span class="t-brace">:</span>    <span class="t-str">"Elicits multi-step reasoning..."</span><span class="t-brace">,</span>
-      <span class="t-key">"source"</span><span class="t-brace">:</span>     <span class="t-str">"arxiv.org/abs/2201.11903"</span><span class="t-brace">,</span>
-      <span class="t-key">"relevance"</span><span class="t-brace">:</span>  <span class="t-num">0.96</span><span class="t-brace">,</span>
-      <span class="t-key">"token_cost"</span><span class="t-brace">:</span> <span class="t-num">142</span>
-    <span class="t-brace">}</span>
+  <span class="t-key">"id"</span><span class="t-brace">:</span>           <span class="t-str">"3e7c224c-..."</span><span class="t-brace">,</span>
+  <span class="t-key">"title"</span><span class="t-brace">:</span>        <span class="t-str">"DeepSeek v4 and the limits of scaling"</span><span class="t-brace">,</span>
+  <span class="t-key">"content_type"</span><span class="t-brace">:</span> <span class="t-str">"article"</span><span class="t-brace">,</span>
+  <span class="t-key">"summary"</span><span class="t-brace">:</span>     <span class="t-str">"DeepSeek's MoE architecture cuts inference..."</span><span class="t-brace">,</span>
+  <span class="t-key">"key_points"</span><span class="t-brace">: [</span>
+    <span class="t-str">"MoE reduces active params by 4× at inference"</span><span class="t-brace">,</span>
+    <span class="t-str">"Outperforms GPT-4o on coding benchmarks"</span><span class="t-brace">,</span>
+    <span class="t-str">"Open weights released under MIT licence"</span>
   <span class="t-brace">],</span>
-  <span class="t-key">"requests_remaining"</span><span class="t-brace">:</span> <span class="t-num">857</span>
+  <span class="t-key">"tags"</span><span class="t-brace">:</span>        <span class="t-brace">[</span><span class="t-str">"ai"</span><span class="t-brace">,</span> <span class="t-str">"llm"</span><span class="t-brace">,</span> <span class="t-str">"open-source"</span><span class="t-brace">],</span>
+  <span class="t-key">"confidence"</span><span class="t-brace">:</span>  <span class="t-num">0.93</span><span class="t-brace">,</span>
+  <span class="t-key">"source_name"</span><span class="t-brace">:</span> <span class="t-str">"Ars Technica"</span><span class="t-brace">,</span>
+  <span class="t-key">"published_at"</span><span class="t-brace">:</span><span class="t-str">"2026-04-25T07:00:00Z"</span>
 <span class="t-brace">}</span></pre>
         </div>
 
       </div>
+    </div>
+  </section>
+
+  <!-- ── COMPRESSION DEMO ── -->
+  <section>
+    <div class="section-inner">
+      <div class="section-label">The compression advantage</div>
+      <h2 class="section-title">Same signal. ~15× fewer tokens.</h2>
+      <p style="color:var(--text-dim);margin-bottom:40px;max-width:640px">
+        Every source item is processed by Claude before it hits the API. You get a structured
+        summary and key points — not a raw transcript your agent has to parse itself.
+      </p>
+      <div class="compare-grid">
+        <div class="compare-block">
+          <div class="compare-label compare-bad">Raw source &nbsp;≈ 2,400 tokens</div>
+          <pre class="compare-pre"><span class="t-comment">Lex Fridman: So let me ask you about scaling.
+Some people say we're hitting a wall—
+
+[Guest]: I think that framing fundamentally
+misunderstands what we're building. Let me
+unpack that. When we talk about scaling, we
+need to distinguish between compute scaling,
+data scaling, and algorithmic efficiency.
+The three interact in non-linear ways that…
+
+[46 more minutes of transcript]
+
+…so the short answer is: we're not hitting
+a wall, we're approaching a threshold where
+the nature of progress changes qualitatively.
+That's a very different thing.</span></pre>
+        </div>
+        <div class="compare-block">
+          <div class="compare-label compare-good">AgentDB output &nbsp;≈ 160 tokens</div>
+          <pre class="compare-pre"><span class="t-brace">{</span>
+  <span class="t-key">"title"</span><span class="t-brace">:</span>      <span class="t-str">"Lex Fridman #412 — Scaling &amp; AGI"</span><span class="t-brace">,</span>
+  <span class="t-key">"summary"</span><span class="t-brace">:</span>    <span class="t-str">"Guest argues scaling limits are
+    misframed; qualitative capability shifts
+    emerge at compute thresholds."</span><span class="t-brace">,</span>
+  <span class="t-key">"key_points"</span><span class="t-brace">: [</span>
+    <span class="t-str">"Compute, data, and algo scaling interact non-linearly"</span><span class="t-brace">,</span>
+    <span class="t-str">"Progress shifts qualitatively near thresholds"</span><span class="t-brace">,</span>
+    <span class="t-str">"'Hitting a wall' framing is misleading"</span>
+  <span class="t-brace">],</span>
+  <span class="t-key">"confidence"</span><span class="t-brace">:</span> <span class="t-num">0.91</span><span class="t-brace">,</span>
+  <span class="t-key">"tags"</span><span class="t-brace">:</span> <span class="t-brace">[</span><span class="t-str">"ai"</span><span class="t-brace">,</span> <span class="t-str">"scaling"</span><span class="t-brace">,</span> <span class="t-str">"agi"</span><span class="t-brace">]</span>
+<span class="t-brace">}</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SOURCES ── -->
+  <section id="sources">
+    <div class="section-inner">
+      <div class="section-label">Knowledge sources</div>
+      <h2 class="section-title">Curated sources. Chosen for signal density.</h2>
+      <p style="color:var(--text-dim);margin-bottom:48px;max-width:640px">
+        No wire services. No legacy media. Every source is selected because it produces
+        original thinking — not aggregated takes. Updated Mon/Wed/Fri at 07:00 UTC.
+      </p>
+      <div class="source-categories">
+
+        <div class="source-cat">
+          <div class="source-cat-label">Technology / AI</div>
+          <div class="source-tags">
+            <span class="source-tag">Lex Fridman Podcast</span>
+            <span class="source-tag">Dwarkesh Podcast</span>
+            <span class="source-tag">Hard Fork</span>
+            <span class="source-tag">This Week in Tech</span>
+            <span class="source-tag">The Tech Report</span>
+            <span class="source-tag">MIT Technology Review</span>
+            <span class="source-tag">Ars Technica</span>
+            <span class="source-tag">Import AI</span>
+            <span class="source-tag">TLDR Tech</span>
+            <span class="source-tag">IEEE Spectrum</span>
+            <span class="source-tag">Benedict Evans</span>
+            <span class="source-tag">arXiv AI</span>
+          </div>
+        </div>
+
+        <div class="source-cat">
+          <div class="source-cat-label">Startups / IPO</div>
+          <div class="source-tags">
+            <span class="source-tag">Acquired</span>
+            <span class="source-tag">How I Built This</span>
+            <span class="source-tag">Y Combinator Blog</span>
+            <span class="source-tag">Y Combinator (YouTube)</span>
+            <span class="source-tag">Hacker News</span>
+            <span class="source-tag">TechCrunch</span>
+            <span class="source-tag">The Verge</span>
+            <span class="source-tag">Entrepreneur</span>
+            <span class="source-tag">The Generalist</span>
+          </div>
+        </div>
+
+        <div class="source-cat">
+          <div class="source-cat-label">Alternative Markets / Macro</div>
+          <div class="source-tags">
+            <span class="source-tag">All-In Podcast</span>
+            <span class="source-tag">Prof G Markets</span>
+            <span class="source-tag">Zero Hedge</span>
+            <span class="source-tag">Wolf Street</span>
+            <span class="source-tag">Econbrowser</span>
+            <span class="source-tag">A Wealth of Common Sense</span>
+            <span class="source-tag">The Big Picture</span>
+            <span class="source-tag">The Daily Upside</span>
+            <span class="source-tag">Farnam Street</span>
+            <span class="source-tag">Asymco</span>
+            <span class="source-tag">Marginal Revolution</span>
+          </div>
+        </div>
+
+        <div class="source-cat">
+          <div class="source-cat-label">Emerging Markets</div>
+          <div class="source-tags">
+            <span class="source-tag">Rest of World</span>
+            <span class="source-tag">TechCabal</span>
+            <span class="source-tag">Techpoint Africa</span>
+            <span class="source-tag">How We Made It In Africa</span>
+            <span class="source-tag">Mint (India)</span>
+            <span class="source-tag">The Hindu Business Line</span>
+          </div>
+        </div>
+
+        <div class="source-cat">
+          <div class="source-cat-label">Policy / Regulation</div>
+          <div class="source-tags">
+            <span class="source-tag">Politico Europe</span>
+            <span class="source-tag">arXiv Policy</span>
+          </div>
+        </div>
+
+      </div>
+      <p style="margin-top:32px;font-size:0.85rem;color:var(--text-muted)">
+        Full machine-readable list:
+        <code style="font-family:var(--mono);color:var(--accent);font-size:0.78rem">GET /v1/knowledge/sources</code>
+        &nbsp;(public, no key required)
+      </p>
     </div>
   </section>
 
@@ -882,6 +1120,7 @@
         <div class="footer-tagline">The knowledge layer for AI agents</div>
       </div>
       <nav class="footer-links">
+        <a href="#sources">Sources</a>
         <a href="#pricing">Pricing</a>
         <a href="https://agentdb-production-9ba0.up.railway.app/docs" target="_blank" rel="noopener">Docs</a>
         <a href="mailto:agentbc9000@gmail.com">Contact</a>
@@ -916,13 +1155,10 @@
               <div class="code-dots"><span></span><span></span><span></span></div>
               <div class="code-label">cURL</div>
             </div>
-            <pre id="code-curl"><span class="t-cmd">curl</span> <span class="t-flag">-X POST</span> \
+            <pre id="code-curl"><span class="t-cmd">curl</span> <span class="t-flag">-s -X POST</span> \
   <span class="t-url">"https://agentdb-production-9ba0.up.railway.app/v1/auth/register"</span> \
   <span class="t-flag">-H</span> <span class="t-str">"Content-Type: application/json"</span> \
-  <span class="t-flag">-d</span> <span class="t-str">'{
-    "agent_id": "your-agent-name",
-    "plan":     "trial"
-  }'</span></pre>
+  <span class="t-flag">-d</span> <span class="t-str">'{}'</span></pre>
           </div>
           <button class="copy-btn" onclick="copyCode('curl-raw')">Copy command</button>
         </div>
@@ -933,17 +1169,20 @@
               <div class="code-dots"><span></span><span></span><span></span></div>
               <div class="code-label">Python</div>
             </div>
-            <pre><span class="t-key">import</span> <span class="t-str">requests</span>
+            <pre><span class="t-key">import</span> <span class="t-str">httpx</span>
 
-<span class="t-val">res</span> = requests.<span class="t-cmd">post</span>(
-    <span class="t-str">"https://agentdb-production-9ba0.up.railway.app/v1/auth/register"</span>,
-    json=<span class="t-brace">{</span>
-        <span class="t-str">"agent_id"</span>: <span class="t-str">"your-agent-name"</span>,
-        <span class="t-str">"plan"</span>:     <span class="t-str">"trial"</span>
-    <span class="t-brace">}</span>
+<span class="t-val">res</span> = httpx.<span class="t-cmd">post</span>(
+    <span class="t-str">"https://agentdb-production-9ba0.up.railway.app/v1/auth/register"</span>
 )
 <span class="t-val">api_key</span> = res.<span class="t-cmd">json</span>()[<span class="t-str">"api_key"</span>]
-<span class="t-key">print</span>(<span class="t-str">f"Your key: </span><span class="t-val">{api_key}</span><span class="t-str">"</span>)</pre>
+<span class="t-key">print</span>(<span class="t-str">f"Your key: </span><span class="t-val">{api_key}</span><span class="t-str">"</span>)
+
+<span class="t-comment"># Then query the API</span>
+<span class="t-val">data</span> = httpx.<span class="t-cmd">get</span>(
+    <span class="t-str">"https://agentdb-production-9ba0.up.railway.app/v1/knowledge/latest"</span>,
+    headers=<span class="t-brace">{</span><span class="t-str">"X-API-Key"</span>: api_key<span class="t-brace">}</span>,
+    params=<span class="t-brace">{</span><span class="t-str">"tags"</span>: <span class="t-str">"ai"</span>, <span class="t-str">"limit"</span>: <span class="t-num">5</span><span class="t-brace">}</span>
+).<span class="t-cmd">json</span>()</pre>
           </div>
           <button class="copy-btn" onclick="copyCode('python-raw')">Copy snippet</button>
         </div>
@@ -954,55 +1193,45 @@
               <div class="code-dots"><span></span><span></span><span></span></div>
               <div class="code-label">JavaScript</div>
             </div>
-            <pre><span class="t-key">const</span> <span class="t-val">res</span> = <span class="t-key">await</span> <span class="t-cmd">fetch</span>(
+            <pre><span class="t-comment">// Register</span>
+<span class="t-key">const</span> <span class="t-brace">{</span> <span class="t-val">api_key</span> <span class="t-brace">}</span> = <span class="t-key">await</span> <span class="t-cmd">fetch</span>(
   <span class="t-str">"https://agentdb-production-9ba0.up.railway.app/v1/auth/register"</span>,
-  <span class="t-brace">{</span>
-    method:  <span class="t-str">"POST"</span>,
-    headers: <span class="t-brace">{</span> <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span> <span class="t-brace">},</span>
-    body:    JSON.<span class="t-cmd">stringify</span>(<span class="t-brace">{</span>
-      agent_id: <span class="t-str">"your-agent-name"</span>,
-      plan:     <span class="t-str">"trial"</span>
-    <span class="t-brace">})</span>
-  <span class="t-brace">}</span>
-);
-<span class="t-key">const</span> <span class="t-brace">{</span> <span class="t-val">api_key</span> <span class="t-brace">}</span> = <span class="t-key">await</span> res.<span class="t-cmd">json</span>();
-console.<span class="t-cmd">log</span>(<span class="t-str">"Your key:"</span>, <span class="t-val">api_key</span>);</pre>
+  <span class="t-brace">{</span> method: <span class="t-str">"POST"</span> <span class="t-brace">}</span>
+).<span class="t-cmd">then</span>(r => r.<span class="t-cmd">json</span>());
+
+<span class="t-comment">// Fetch knowledge</span>
+<span class="t-key">const</span> <span class="t-val">data</span> = <span class="t-key">await</span> <span class="t-cmd">fetch</span>(
+  <span class="t-str">"https://agentdb-production-9ba0.up.railway.app/v1/knowledge/latest?tags=ai&amp;limit=5"</span>,
+  <span class="t-brace">{</span> headers: <span class="t-brace">{</span> <span class="t-str">"X-API-Key"</span>: <span class="t-val">api_key</span> <span class="t-brace">} }</span>
+).<span class="t-cmd">then</span>(r => r.<span class="t-cmd">json</span>());</pre>
           </div>
           <button class="copy-btn" onclick="copyCode('js-raw')">Copy snippet</button>
         </div>
 
         <!-- hidden raw text for copy -->
-        <textarea id="curl-raw" style="position:absolute;opacity:0;pointer-events:none" readonly>curl -X POST \
+        <textarea id="curl-raw" style="position:absolute;opacity:0;pointer-events:none" readonly>curl -s -X POST \
   "https://agentdb-production-9ba0.up.railway.app/v1/auth/register" \
   -H "Content-Type: application/json" \
-  -d '{
-    "agent_id": "your-agent-name",
-    "plan":     "trial"
-  }'</textarea>
-        <textarea id="python-raw" style="position:absolute;opacity:0;pointer-events:none" readonly>import requests
+  -d '{}'</textarea>
+        <textarea id="python-raw" style="position:absolute;opacity:0;pointer-events:none" readonly>import httpx
 
-res = requests.post(
-    "https://agentdb-production-9ba0.up.railway.app/v1/auth/register",
-    json={
-        "agent_id": "your-agent-name",
-        "plan":     "trial"
-    }
-)
+res = httpx.post("https://agentdb-production-9ba0.up.railway.app/v1/auth/register")
 api_key = res.json()["api_key"]
-print(f"Your key: {api_key}")</textarea>
-        <textarea id="js-raw" style="position:absolute;opacity:0;pointer-events:none" readonly>const res = await fetch(
+
+data = httpx.get(
+    "https://agentdb-production-9ba0.up.railway.app/v1/knowledge/latest",
+    headers={"X-API-Key": api_key},
+    params={"tags": "ai", "limit": 5}
+).json()</textarea>
+        <textarea id="js-raw" style="position:absolute;opacity:0;pointer-events:none" readonly>const { api_key } = await fetch(
   "https://agentdb-production-9ba0.up.railway.app/v1/auth/register",
-  {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify({
-      agent_id: "your-agent-name",
-      plan:     "trial"
-    })
-  }
-);
-const { api_key } = await res.json();
-console.log("Your key:", api_key);</textarea>
+  { method: "POST" }
+).then(r => r.json());
+
+const data = await fetch(
+  "https://agentdb-production-9ba0.up.railway.app/v1/knowledge/latest?tags=ai&limit=5",
+  { headers: { "X-API-Key": api_key } }
+).then(r => r.json());</textarea>
       </div>
     </div>
   </div>

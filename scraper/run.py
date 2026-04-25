@@ -130,7 +130,11 @@ def _scrape_blogs() -> tuple[list[dict], list[dict[str, Any]]]:
         logger.info("[Blog] Scraping: %s", name)
 
         try:
-            data = scrape_blog_source(source["rss_url"], name)
+            data = scrape_blog_source(
+                source["rss_url"],
+                name,
+                rss_text_mode=source.get("rss_text_mode", False),
+            )
         except Exception as exc:
             logger.error("[Blog] Scrape exception for %s: %s", name, exc)
             failed.append({"source_name": name, "content_type": "article",

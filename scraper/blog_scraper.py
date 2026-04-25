@@ -55,16 +55,24 @@ HTTP_HEADERS = {
 }
 
 
-def get_latest_article(rss_url: str, source_name: str) -> Optional[dict]:
+def get_latest_article(
+    rss_url: str,
+    source_name: str,
+    rss_text_mode: bool = False,
+) -> Optional[dict]:
     """
     Parse an RSS/Atom feed and return metadata for the latest entry.
 
     Args:
         rss_url: Full URL to the RSS or Atom feed.
         source_name: Human-readable name used for logging.
+        rss_text_mode: When True, extract the RSS entry summary/description
+            directly instead of following the article URL.  Use this for
+            sources whose article pages are blocked, JS-rendered, or
+            paywalled (arXiv, Substack newsletters, TLDR-style digests, etc.)
 
     Returns:
-        Dict with keys ``title`` and ``url``, or None on failure.
+        Dict with keys ``title``, ``url``, and ``rss_text``, or None on failure.
     """
     logger.info("Fetching RSS feed for %s: %s", source_name, rss_url)
     try:
@@ -95,19 +103,31 @@ def get_latest_article(rss_url: str, source_name: str) -> Optional[dict]:
 
     logger.info("Latest article for %s: '%s' (%s)", source_name, title, url)
 
-    # For YouTube RSS feeds, extract the video description from the entry
-    # (transcript scraping is blocked on Railway — description is the best we can do)
+    # Extract RSS entry text when requested (or automatically for YouTube,
+    # where transcript scraping is blocked on Railway).
+    use_rss_text = rss_text_mode or "youtube.com/feeds" in rss_url
     rss_text = ""
-    if "youtube.com/feeds" in rss_url:
-        rss_text = (
-            entry.get("summary")
-            or entry.get("description")
-            or ""
-        ).strip()
+    if use_rss_text:
+        # feedparser normalises both <description> and <content:encoded> into
+        # entry.summary; fall back through a chain of common field names.
+        for field in ("content", "summary", "description", "summary_detail"):
+            raw = entry.get(field)
+            if isinstance(raw, list) and raw:
+                raw = raw[0].get("value", "")
+            if raw and isinstance(raw, str):
+                rss_text = raw.strip()
+                break
+
         if rss_text:
-            logger.info("YouTube RSS description for %s: %d chars", source_name, len(rss_text))
+            # Strip HTML tags that sometimes appear in feed descriptions
+            rss_text = BeautifulSoup(rss_text, "html.parser").get_text(
+                separator="\n", strip=True
+            )
+            logger.info(
+                "RSS text extracted for %s: %d chars", source_name, len(rss_text)
+            )
         else:
-            logger.warning("YouTube RSS entry for %s has no description", source_name)
+            logger.warning("RSS entry for %s has no description text", source_name)
 
     return {"title": title, "url": url, "rss_text": rss_text}
 
@@ -154,17 +174,37 @@ def _extract_text(soup: BeautifulSoup) -> str:
 
     root = content_el or soup.find("body") or soup
 
-    # Extract paragraphs / headings in reading order
-    paragraphs = []
-    for el in root.find_all(["p", "h1", "h2", "h3", "h4", "h5", "h6", "li", "blockquote"]):
-        text = el.get_text(separator=" ", strip=True)
-        if text and len(text) > 20:  # skip trivially short fragments
-            paragraphs.append(text)
+    def _para_text(el) -> str:
+        """Extract paragraph/heading text from *el*, filtering short fragments."""
+        paras = []
+        for child in el.find_all(
+            ["p", "h1", "h2", "h3", "h4", "h5", "h6", "li", "blockquote"]
+        ):
+            t = child.get_text(separator=" ", strip=True)
+            if t and len(t) > 20:
+                paras.append(t)
+        return "\n\n".join(paras)
 
-    if paragraphs:
-        return "\n\n".join(paragraphs)
+    text = _para_text(root)
 
-    # Last resort: dump all text
+    # Some pages (Tailwind SPAs, digest newsletters) put content in <div>
+    # elements rather than <p> tags.  When a content-selector element was
+    # matched but yields very little paragraph text, fall back to the full
+    # <body> — first via paragraph extraction, then via a plain text dump.
+    MIN_USEFUL = 500
+    if content_el and len(text) < MIN_USEFUL:
+        body = soup.find("body") or soup
+        body_text = _para_text(body)
+        if len(body_text) > len(text):
+            text = body_text
+        # Still short?  Dump all body text (catches div-only layouts).
+        if len(text) < MIN_USEFUL:
+            text = body.get_text(separator="\n", strip=True)
+
+    if text:
+        return text
+
+    # Absolute last resort
     return root.get_text(separator="\n", strip=True)
 
 
@@ -233,26 +273,34 @@ def scrape_article(url: str) -> Optional[dict]:
     }
 
 
-def scrape_blog_source(rss_url: str, source_name: str) -> Optional[dict]:
+def scrape_blog_source(
+    rss_url: str,
+    source_name: str,
+    rss_text_mode: bool = False,
+) -> Optional[dict]:
     """
     High-level helper: get the latest article URL from the feed, then scrape it.
 
     Args:
         rss_url: Full URL to the RSS or Atom feed.
         source_name: Human-readable source name.
+        rss_text_mode: When True (or when the feed is a YouTube RSS feed),
+            use the RSS entry description as the text instead of scraping
+            the article page.
 
     Returns:
         Dict with keys ``title``, ``url``, ``text``, or None on failure.
     """
-    article_meta = get_latest_article(rss_url, source_name)
+    article_meta = get_latest_article(rss_url, source_name, rss_text_mode=rss_text_mode)
     if article_meta is None:
         return None
 
-    # YouTube RSS: use the video description directly — don't scrape the video page
+    # RSS text mode (YouTube, arXiv, Substack newsletters, digest feeds…):
+    # use the entry description directly — don't try to scrape the target page.
     if article_meta.get("rss_text"):
         if len(article_meta["rss_text"]) < 100:
             logger.warning(
-                "YouTube description too short for %s (%d chars) — skipping",
+                "RSS description too short for %s (%d chars) — skipping",
                 source_name, len(article_meta["rss_text"])
             )
             return None
