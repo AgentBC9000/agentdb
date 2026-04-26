@@ -13,6 +13,14 @@ YOUTUBE_SOURCES = []  # transcript scraping blocked on Railway — use YouTube R
 PODCAST_SOURCES = [
     # ── Technology / AI ──────────────────────────────────────────────────────
     {
+        "name": "ChinaTalk",
+        "rss_url": "https://chinatalk.substack.com/feed",
+        "category": "technology_ai",
+        "hosts": ["Jordan Schneider"],
+        "transcript_selectors": [],
+        # Substack full post content comes through in show notes (~39k chars)
+    },
+    {
         "name": "Lex Fridman Podcast",
         "rss_url": "https://lexfridman.com/feed/podcast/",
         "category": "technology_ai",
