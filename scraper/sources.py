@@ -116,6 +116,7 @@ BLOG_SOURCES = [
         "name": "Ars Technica",
         "rss_url": "https://feeds.arstechnica.com/arstechnica/index",
         "category": "technology_ai",
+        "rss_text_mode": True,  # Cloudflare blocks article scraping; RSS has full content
     },
     {
         "name": "Import AI",
@@ -145,6 +146,7 @@ BLOG_SOURCES = [
         "name": "404 Media",
         "rss_url": "https://www.404media.co/feed",
         "category": "technology_ai",
+        "rss_text_mode": True,  # Paid newsletter — summary in RSS entry
     },
     # ── Startups / IPO ───────────────────────────────────────────────────────
     {
@@ -167,6 +169,7 @@ BLOG_SOURCES = [
         "name": "Wired",
         "rss_url": "https://www.wired.com/feed/rss",
         "category": "technology_ai",
+        "rss_text_mode": True,  # Hard paywall — RSS summary only
     },
     {
         "name": "Entrepreneur",
@@ -191,13 +194,15 @@ BLOG_SOURCES = [
     },
     {
         "name": "Calculated Risk",
-        "rss_url": "https://feeds.feedburner.com/CalculatedRisk",
+        "rss_url": "https://www.calculatedriskblog.com/feeds/posts/default",
         "category": "market_news_alternative",
+        "rss_text_mode": True,  # Direct Blogger feed; FeedBurner URL was unreliable
     },
     {
         "name": "Econbrowser",
         "rss_url": "https://econbrowser.com/feed",
         "category": "market_news_alternative",
+        "rss_text_mode": True,  # Site returns stub on scrape; RSS has post content
     },
     {
         "name": "A Wealth of Common Sense",
@@ -221,8 +226,9 @@ BLOG_SOURCES = [
     },
     {
         "name": "Noahpinion",
-        "rss_url": "https://www.noahpinion.blog/feed",
+        "rss_url": "https://noahpinion.substack.com/feed",
         "category": "market_news_alternative",
+        "rss_text_mode": True,  # Substack feed; custom domain blocked scrapers
     },
     # ── Policy / Regulation ──────────────────────────────────────────────────
     {
@@ -247,6 +253,7 @@ BLOG_SOURCES = [
         "name": "TechCabal",
         "rss_url": "https://techcabal.com/feed/",
         "category": "emerging_markets_africa",
+        "rss_text_mode": True,  # Site returns garbled HTML; RSS has clean content
     },
     {
         "name": "Techpoint Africa",
@@ -257,11 +264,38 @@ BLOG_SOURCES = [
         "name": "Disrupt Africa",
         "rss_url": "https://disrupt-africa.com/feed/",
         "category": "emerging_markets_africa",
+        "rss_text_mode": True,  # Site blocks scrapers; RSS has article content
     },
     {
         "name": "Mint (India)",
         "rss_url": "https://www.livemint.com/rss/news",
         "category": "emerging_markets_asia",
+    },
+    {
+        "name": "Asia Times",
+        "rss_url": "https://asiatimes.com/feed/",
+        "category": "emerging_markets_asia",
+    },
+    {
+        "name": "TechTrends Africa",
+        "rss_url": "https://techtrendsafrica.com/feed/",
+        "category": "emerging_markets_africa",
+    },
+    {
+        "name": "Parsers VC",
+        "rss_url": "https://parsers.substack.com/feed",
+        "category": "startups_ipo",
+        "rss_text_mode": True,  # Substack full-post content in RSS entry
+    },
+    {
+        "name": "Intelligent CIO LatAm",
+        "rss_url": "https://www.intelligentcio.com/latam/feed/",
+        "category": "emerging_markets",
+    },
+    {
+        "name": "Digitalisation World",
+        "rss_url": "https://digitalisationworld.com/rss/news",
+        "category": "technology_ai",
     },
 ]
 

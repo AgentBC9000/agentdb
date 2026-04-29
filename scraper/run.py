@@ -185,19 +185,19 @@ def _scrape_youtube() -> tuple[list[dict], list[dict[str, Any]]]:
             data = scrape_blog_source(source["rss_url"], name)
         except Exception as exc:
             logger.error("[YouTube] Scrape exception for %s: %s", name, exc)
-            failed.append({"source_name": name, "content_type": "youtube_rss",
+            failed.append({"source_name": name, "content_type": "video",
                            "success": False, "error": f"Scrape exception: {exc}"})
             continue
 
         if data is None:
-            failed.append({"source_name": name, "content_type": "youtube_rss",
+            failed.append({"source_name": name, "content_type": "video",
                            "success": False, "error": "Could not fetch RSS description"})
             continue
 
         text = data.get("text", "")
         if len(text) < MIN_TEXT_CHARS:
             logger.warning("[YouTube] Skipping %s — text too short (%d chars)", name, len(text))
-            failed.append({"source_name": name, "content_type": "youtube_rss",
+            failed.append({"source_name": name, "content_type": "video",
                            "success": False, "error": f"Content too short ({len(text)} chars)"})
             continue
 
@@ -207,7 +207,7 @@ def _scrape_youtube() -> tuple[list[dict], list[dict[str, Any]]]:
             "scraped": data,
             "source_name": name,
             "category": source["category"],
-            "content_type": "youtube_rss",
+            "content_type": "video",
             "raw_chars": len(text),
         })
         logger.info("[YouTube] %s scraped OK (%d chars)", name, len(text))
