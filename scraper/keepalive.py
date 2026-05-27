@@ -9,6 +9,7 @@ import asyncio
 import os
 import re
 import sys
+from urllib.parse import urlparse, unquote
 
 
 async def ping():
@@ -33,8 +34,21 @@ async def ping():
     # Strip query params (e.g. ?sslmode=require) — asyncpg handles ssl separately
     url = re.sub(r"\?.*$", "", url)
 
+    # Parse URL components individually so special characters in the password
+    # (e.g. @, /, #) don't break asyncpg's own URL parser.
+    parsed = urlparse(url)
+    connect_kwargs = dict(
+        host=parsed.hostname,
+        port=parsed.port or 5432,
+        user=parsed.username,
+        password=unquote(parsed.password) if parsed.password else None,
+        database=(parsed.path or "/postgres").lstrip("/") or "postgres",
+        ssl="require",
+        timeout=15,
+    )
+
     try:
-        conn = await asyncpg.connect(url, ssl="require", timeout=15)
+        conn = await asyncpg.connect(**connect_kwargs)
         result = await conn.fetchval("SELECT 1")
         await conn.close()
         print(f"Supabase ping OK — SELECT 1 = {result}", flush=True)
