@@ -1,137 +1,115 @@
 """
 AgentDB Knowledge Scraper — Ingest
-POSTs compressed knowledge items to the AgentDB /v1/knowledge/ingest endpoint.
+Writes summarised knowledge items directly to Supabase via the PostgREST API.
+No FastAPI layer required.
 """
 
+import json
 import logging
 import os
+import uuid
 from typing import Optional
 
 import httpx
 
 logger = logging.getLogger(__name__)
 
-INGEST_PATH = "/v1/knowledge/ingest"
 REQUEST_TIMEOUT = 30  # seconds
 
 
 def _get_config() -> Optional[tuple]:
     """
-    Read required environment variables.
+    Read Supabase credentials from environment.
 
     Returns:
-        Tuple of (api_url, admin_secret), or None if either is missing.
+        Tuple of (rest_url, service_key), or None if either is missing.
     """
-    api_url = os.environ.get("AGENTDB_API_URL", "").strip().rstrip("/")
-    admin_secret = os.environ.get("AGENTDB_ADMIN_SECRET", "")
+    supabase_url = os.environ.get("SUPABASE_URL", "").strip().rstrip("/")
+    service_key = os.environ.get("SUPABASE_SERVICE_KEY", "").strip()
 
-    if not api_url:
-        logger.error(
-            "AGENTDB_API_URL environment variable is not set. "
-            "Example: https://agentdb-production-9ba0.up.railway.app"
-        )
+    if not supabase_url:
+        logger.error("SUPABASE_URL environment variable is not set.")
+        return None
+    if not service_key:
+        logger.error("SUPABASE_SERVICE_KEY environment variable is not set.")
         return None
 
-    if not admin_secret:
-        logger.error("AGENTDB_ADMIN_SECRET environment variable is not set.")
-        return None
-
-    return api_url, admin_secret
+    rest_url = f"{supabase_url}/rest/v1/knowledge"
+    return rest_url, service_key
 
 
 def _build_payload(item: dict) -> dict:
-    """
-    Map a summarised knowledge item to the AgentDB ingest request payload.
-
-    Maps summariser output to the API's IngestRequest schema:
-      title, content_type, summary, body, tags, source_url, confidence
-    """
-    # Pack extra metadata into the body dict so nothing is lost
+    """Map a summarised knowledge item to the knowledge table row."""
     body = {
         "key_points": item.get("key_points", []),
         "source_name": item.get("source_name", ""),
         "category": item.get("category", ""),
     }
-    if item.get("video_id"):
-        body["video_id"] = item["video_id"]
 
-    # Merge token tracking metadata (raw_chars, input_tokens, output_tokens,
-    # compression_ratio) when present — stored in body JSONB, no schema change needed
     token_meta = item.pop("_token_meta", None) or {}
     if token_meta:
         body.update(token_meta)
 
+    # Podcast-specific body fields passed through from run.py
+    if item.get("body"):
+        body.update(item["body"])
+
     return {
+        "id": str(uuid.uuid4()),
         "title": item.get("title", ""),
-        "content_type": item.get("content_type", "blog_article"),
+        "content_type": item.get("content_type", "article"),
         "summary": item.get("summary", ""),
         "body": body,
         "tags": item.get("tags", []),
         "source_url": item.get("url") or None,
         "confidence": item.get("confidence", 0.5),
-        "relevance_score": item.get("confidence", 0.5),  # use confidence as relevance too
-        "generate_embedding": False,  # no OpenAI key in scraper
+        "relevance_score": item.get("confidence", 0.5),
     }
 
 
 def ingest_item(item: dict) -> bool:
     """
-    POST a knowledge item to the AgentDB ingest endpoint.
+    Insert a knowledge item directly into Supabase via the PostgREST API.
 
     Args:
-        item: Dict produced by summariser.summarise() with optional ``url``
-              and ``video_id`` fields attached by the caller.
+        item: Dict produced by summariser.summarise() with url/category/content_type attached.
 
     Returns:
-        True if the item was accepted (2xx response), False otherwise.
+        True if inserted successfully, False otherwise.
     """
     config = _get_config()
     if config is None:
         return False
 
-    api_url, admin_secret = config
-    endpoint = api_url + INGEST_PATH
+    rest_url, service_key = config
     payload = _build_payload(item)
 
-    logger.info("Ingesting '%s' to %s", item.get("title", "<no title>"), endpoint)
+    logger.info("Ingesting '%s' → Supabase", payload["title"])
+
+    headers = {
+        "apikey": service_key,
+        "Authorization": f"Bearer {service_key}",
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal",
+    }
 
     try:
         with httpx.Client(timeout=REQUEST_TIMEOUT) as client:
-            response = client.post(
-                endpoint,
-                json=payload,
-                params={"secret": admin_secret},
-                headers={
-                    "Content-Type": "application/json",
-                    "User-Agent": "AgentDB-Scraper/1.0",
-                },
-            )
+            response = client.post(rest_url, json=payload, headers=headers)
     except httpx.HTTPError as exc:
-        logger.error(
-            "HTTP error posting to AgentDB for '%s': %s",
-            item.get("title", ""),
-            exc,
-        )
+        logger.error("HTTP error ingesting '%s': %s", payload["title"], exc)
         return False
     except Exception as exc:
-        logger.error(
-            "Unexpected error posting to AgentDB for '%s': %s",
-            item.get("title", ""),
-            exc,
-        )
+        logger.error("Unexpected error ingesting '%s': %s", payload["title"], exc)
         return False
 
     if response.is_success:
-        logger.info(
-            "Successfully ingested '%s' (HTTP %s)",
-            item.get("title", ""),
-            response.status_code,
-        )
+        logger.info("Ingested '%s' (HTTP %s)", payload["title"], response.status_code)
         return True
 
     logger.error(
-        "AgentDB rejected ingest for '%s': HTTP %s — %s",
-        item.get("title", ""),
+        "Supabase rejected ingest for '%s': HTTP %s — %s",
+        payload["title"],
         response.status_code,
         response.text[:300],
     )

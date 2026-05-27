@@ -1,18 +1,16 @@
 """
 AgentDB Knowledge Scraper — Main Entry Point
-Runs Mon/Wed/Fri at 07:00 UTC (configure via Railway cron: "0 7 * * 1,3,5").
+Runs Mon/Wed/Fri at 07:00 UTC via GitHub Actions cron.
 
 Pipeline
 --------
 Phase 1  Scrape all sources (RSS → HTML → clean text)
-Phase 2  Filter stubs  (text < MIN_TEXT_CHARS → skip, no Claude call)
-Phase 3  Submit one Anthropic Message Batch (50 % cost vs sequential calls)
-Phase 4  Poll until batch completes
-Phase 5  Ingest results into AgentDB
-Phase 6  Send email report
+Phase 2  Summarise each item sequentially via DeepSeek
+Phase 3  Ingest results into AgentDB
+Phase 4  Send email report
 
 Required environment variables:
-    ANTHROPIC_API_KEY       — Anthropic API key for Claude summarisation
+    DEEPSEEK_API_KEY        — DeepSeek API key for summarisation
     AGENTDB_API_URL         — Base URL of the AgentDB API
     AGENTDB_ADMIN_SECRET    — Admin bearer token for /v1/knowledge/ingest
     RESEND_API_KEY          — Resend HTTP API key for email reports
@@ -32,9 +30,7 @@ from sources import BLOG_SOURCES, PODCAST_SOURCES, YOUTUBE_RSS_SOURCES
 from summariser import (
     MIN_TEXT_CHARS,
     CreditExhaustedError,
-    build_batch_request,
-    poll_batch,
-    submit_batch,
+    summarise,
 )
 
 # ---------------------------------------------------------------------------
@@ -345,69 +341,50 @@ def main() -> None:
         send_report(pre_batch_failures)
         sys.exit(1)
 
-    # ── Phase 2/3: Build batch requests and submit ───────────────────────────
-    logger.info("Phase 2 — Building and submitting Anthropic batch (%d items) …", len(all_scraped))
-
-    batch_requests = [
-        build_batch_request(
-            custom_id=item["custom_id"],
-            title=item["scraped"]["title"],
-            text=item["scraped"]["text"],
-            content_type=item["content_type"],
-            source_name=item["source_name"],
-            category=item["category"],
-        )
-        for item in all_scraped
-    ]
-
-    try:
-        batch_id = submit_batch(batch_requests)
-    except CreditExhaustedError as exc:
-        logger.error("ABORTING — credits exhausted before batch submission: %s", exc)
-        send_report(pre_batch_failures, abort_reason=str(exc))
-        sys.exit(0)  # graceful abort
-    except Exception as exc:
-        logger.error("Batch submission failed: %s", exc)
-        send_report(pre_batch_failures, abort_reason=f"Batch submission error: {exc}")
-        sys.exit(1)
-
-    # ── Phase 4: Poll for batch completion ───────────────────────────────────
-    logger.info("Phase 3 — Polling batch %s …", batch_id)
-
-    try:
-        batch_results = poll_batch(batch_id)
-    except TimeoutError as exc:
-        logger.error("Batch timed out: %s", exc)
-        send_report(pre_batch_failures, abort_reason=str(exc))
-        sys.exit(1)
-    except Exception as exc:
-        logger.error("Unexpected error polling batch: %s", exc)
-        send_report(pre_batch_failures, abort_reason=f"Batch poll error: {exc}")
-        sys.exit(1)
-
-    # ── Phase 5: Ingest results ──────────────────────────────────────────────
-    logger.info("Phase 4 — Ingesting %d summarised items …", len(batch_results))
+    # ── Phase 2: Summarise each item sequentially via DeepSeek ──────────────
+    logger.info("Phase 2 — Summarising %d items via DeepSeek …", len(all_scraped))
 
     ingest_results: list[dict[str, Any]] = []
     for item in all_scraped:
-        cid = item["custom_id"]
-        knowledge = batch_results.get(cid)
-
-        if knowledge is None:
+        name = item["source_name"]
+        try:
+            knowledge = summarise(
+                title=item["scraped"]["title"],
+                text=item["scraped"]["text"],
+                content_type=item["content_type"],
+                source_name=name,
+                category=item["category"],
+            )
+        except CreditExhaustedError as exc:
+            logger.error("ABORTING — DeepSeek credits exhausted: %s", exc)
+            send_report(pre_batch_failures + ingest_results, abort_reason=str(exc))
+            sys.exit(0)  # graceful abort
+        except Exception as exc:
+            logger.error("Unexpected summariser error for %s: %s", name, exc)
             ingest_results.append({
-                "source_name": item["source_name"],
+                "source_name": name,
                 "content_type": item["content_type"],
                 "success": False,
-                "error": "Claude summarisation returned no result",
+                "error": f"Summariser exception: {exc}",
             })
             continue
 
+        if knowledge is None:
+            ingest_results.append({
+                "source_name": name,
+                "content_type": item["content_type"],
+                "success": False,
+                "error": "DeepSeek summarisation returned no result",
+            })
+            continue
+
+        # ── Phase 3: Ingest each item as it's summarised ─────────────────────
         result = _ingest_item(item, knowledge)
         ingest_results.append(result)
         status = "OK" if result["success"] else f"FAIL ({result.get('error', '?')})"
-        logger.info("[%s] %s → %s", item["content_type"].upper(), item["source_name"], status)
+        logger.info("[%s] %s → %s", item["content_type"].upper(), name, status)
 
-    # ── Phase 6: Report ──────────────────────────────────────────────────────
+    # ── Phase 4: Report ──────────────────────────────────────────────────────
     all_results = pre_batch_failures + ingest_results
     succeeded = sum(1 for r in all_results if r["success"])
     failed = len(all_results) - succeeded
