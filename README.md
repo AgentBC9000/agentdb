@@ -1,92 +1,25 @@
 # AgentDB
 
-**Real-time curated knowledge API for AI agents.**
+**Fresh RAG context for AI agents — updated Mon/Wed/Fri.**
 
-AgentDB is a knowledge base updated Mon/Wed/Fri with summaries from 31 curated sources spanning AI/tech, startups, alternative markets, and emerging markets (Africa & Asia). Connect it to your AI agent so it always has fresh context — without you having to manage scraping, summarisation, or storage.
+AgentDB is a curated knowledge base your agent queries at inference time. 41 sources — AI/tech, startups, alternative markets, and emerging economies — scraped, AI-summarised, and structured into agent-ready JSON.
 
----
+Connect it to Claude Desktop, Cursor, or any MCP-compatible agent in under 2 minutes.
 
-## Quick start
-
-### 1. Get an API key
-
-```bash
-curl -s -X POST https://agentdb-production-9ba0.up.railway.app/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email": "you@example.com", "name": "Your Agent"}'
-```
-
-Response:
-```json
-{
-  "api_key": "adb_xxxxxxxxxxxxxxxxxxxx",
-  "tier": "trial",
-  "trial_expires_at": "2026-04-21T07:00:00",
-  "message": "Welcome to AgentDB. Your 3-day trial has started."
-}
-```
-
-Store your key — it's shown once.
-
-### 2. Fetch the latest knowledge
-
-```bash
-curl https://agentdb-production-9ba0.up.railway.app/v1/knowledge/latest \
-  -H "X-API-Key: adb_xxxxxxxxxxxxxxxxxxxx"
-```
+→ **[Request access](mailto:agentbc9000@gmail.com?subject=AgentDB%20Access%20Request)**
 
 ---
 
-## MCP server (recommended for Claude)
+## MCP server (Claude Desktop / Cursor / Claude Code)
 
-The AgentDB MCP server exposes two tools directly inside Claude Code or Claude Desktop: `get_latest_knowledge` and `search_knowledge`.
+The AgentDB MCP server gives your agent two tools: `get_latest_knowledge` and `search_knowledge`.
 
-### Install with uv (recommended)
+### Prerequisites
 
-[uv](https://docs.astral.sh/uv/) handles Python version management automatically — no need to install Python 3.10+ manually.
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) — it handles Python automatically:
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-### Claude Code — global config
-
-Add to `~/.claude.json` (works in every Claude Code session):
-
-```json
-{
-  "mcpServers": {
-    "agentdb": {
-      "type": "stdio",
-      "command": "/path/to/uv",
-      "args": ["run", "/path/to/agentdb/mcp/server.py"],
-      "env": {
-        "AGENTDB_API_KEY": "adb_xxxxxxxxxxxxxxxxxxxx"
-      }
-    }
-  }
-}
-```
-
-Find your `uv` path with `which uv`. Find the server path with `realpath mcp/server.py` from this repo.
-
-### Claude Code — project config
-
-Add a `.mcp.json` to your project root:
-
-```json
-{
-  "mcpServers": {
-    "agentdb": {
-      "type": "stdio",
-      "command": "uv",
-      "args": ["run", "/absolute/path/to/agentdb/mcp/server.py"],
-      "env": {
-        "AGENTDB_API_KEY": "adb_xxxxxxxxxxxxxxxxxxxx"
-      }
-    }
-  }
-}
 ```
 
 ### Claude Desktop
@@ -100,165 +33,202 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
       "command": "uv",
       "args": ["run", "/absolute/path/to/agentdb/mcp/server.py"],
       "env": {
-        "AGENTDB_API_KEY": "adb_xxxxxxxxxxxxxxxxxxxx"
+        "AGENTDB_SUPABASE_URL": "your-supabase-url",
+        "AGENTDB_API_KEY": "your-api-key"
       }
     }
   }
 }
 ```
 
-### Run the MCP server manually (test it)
+### Claude Code (global — all sessions)
 
-```bash
-AGENTDB_API_KEY=adb_xxxxxxxxxxxxxxxxxxxx uv run mcp/server.py
-```
-
-### Available MCP tools
-
-| Tool | Tier | Description |
-|------|------|-------------|
-| `get_latest_knowledge` | Trial + Pro | Fetch the N most recent items, optionally filtered by tags or content type |
-| `search_knowledge` | Pro | Semantic vector search — find items most relevant to a natural language query |
-
----
-
-## REST API reference
-
-Base URL: `https://agentdb-production-9ba0.up.railway.app`
-
-All endpoints (except `/health`, `/v1/auth/register`, and `/v1/knowledge/sources`) require:
-
-```
-X-API-Key: adb_xxxxxxxxxxxxxxxxxxxx
-```
-
-### Knowledge
-
-| Method | Path | Tier | Description |
-|--------|------|------|-------------|
-| `GET` | `/v1/knowledge/latest` | Trial + Pro | Latest items; supports `limit`, `page`, `tags`, `content_type` |
-| `GET` | `/v1/knowledge/search?q=...` | Pro | Semantic search |
-| `GET` | `/v1/knowledge/{id}` | Trial + Pro | Single item by ID |
-| `GET` | `/v1/knowledge/sources` | Public | List of all scraped sources |
-
-#### Query parameters — `/latest`
-
-| Param | Type | Default | Description |
-|-------|------|---------|-------------|
-| `limit` | int | 20 | Items per page (1–100) |
-| `page` | int | 1 | Page number |
-| `tags` | string | — | Comma-separated tag filter, e.g. `ai,markets` |
-| `content_type` | string | — | `article`, `video`, `research`, or `data` |
-
-#### Example response item
+Add to `~/.claude.json`:
 
 ```json
 {
-  "id": "3e7c224c-...",
-  "title": "Quantum Jamming and the Search for Principles Deeper Than Quantum Mechanics",
-  "content_type": "article",
-  "summary": "Researchers are exploring whether cryptographic protocols...",
-  "body": {
-    "category": "science_research",
-    "key_points": ["...", "..."],
-    "source_name": "Quanta Magazine"
-  },
-  "tags": ["quantum-mechanics", "cryptography", "causality"],
-  "confidence": 0.92,
-  "relevance_score": 0.92,
-  "published_at": "2026-04-18T11:40:55+00:00"
+  "mcpServers": {
+    "agentdb": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "/absolute/path/to/agentdb/mcp/server.py"],
+      "env": {
+        "AGENTDB_SUPABASE_URL": "your-supabase-url",
+        "AGENTDB_API_KEY": "your-api-key"
+      }
+    }
+  }
 }
 ```
 
-### Auth
+### Claude Code (project-level)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/v1/auth/register` | Register and get a trial API key |
-| `GET` | `/v1/auth/me` | Inspect your key (tier, usage, expiry) |
+Add `.mcp.json` to your project root:
+
+```json
+{
+  "mcpServers": {
+    "agentdb": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "/absolute/path/to/agentdb/mcp/server.py"],
+      "env": {
+        "AGENTDB_SUPABASE_URL": "your-supabase-url",
+        "AGENTDB_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+### Test it manually
+
+```bash
+AGENTDB_SUPABASE_URL=https://xxxx.supabase.co \
+AGENTDB_API_KEY=your-key \
+uv run mcp/server.py
+```
+
+---
+
+## Available tools
+
+### `get_latest_knowledge`
+
+Fetch the most recent items, optionally filtered by tag or content type.
+
+```
+Parameters:
+  limit         int     Items to return (1–50, default 10)
+  tags          string  Comma-separated tag filter, e.g. "ai,startups"
+  content_type  string  article | video | research | data
+```
+
+Example response item:
+
+```json
+{
+  "title": "DeepSeek v4 and the limits of scaling",
+  "content_type": "article",
+  "summary": "DeepSeek's mixture-of-experts approach cuts inference cost...",
+  "body": {
+    "source_name": "Ars Technica",
+    "key_points": [
+      "MoE reduces active parameters by 4× at inference",
+      "Outperforms GPT-4o on coding benchmarks",
+      "Open weights released under MIT licence"
+    ]
+  },
+  "tags": ["ai", "llm", "open-source"],
+  "confidence": 0.93,
+  "published_at": "2026-05-26T07:00:00Z"
+}
+```
+
+### `search_knowledge`
+
+Search titles and summaries by keyword.
+
+```
+Parameters:
+  query   string  Keyword or phrase (required)
+  limit   int     Results to return (1–20, default 5)
+```
 
 ---
 
 ## Sources
 
-AgentDB ingests from 31 sources, updated Mon/Wed/Fri at 07:00 UTC.
+41 sources · updated Mon/Wed/Fri at 07:00 UTC · no paywalls, no wire services.
 
-Focus: AI/tech, startups/IPO, alternative markets, and emerging markets (Africa & Asia). No legacy wire services.
-
-**Podcasts (8)**
-
-| Source | Category |
-|--------|----------|
-| Lex Fridman Podcast | technology_ai |
-| Dwarkesh Podcast | technology_ai |
-| Hard Fork | technology_ai |
-| This Week in Tech | technology_ai |
-| Acquired | startups_ipo |
-| How I Built This | startups_ipo |
-| All-In Podcast | market_news_alternative |
-| Prof G Markets Podcast | market_news_alternative |
-
-**Blogs (22)**
-
-| Source | Category |
-|--------|----------|
-| MIT Technology Review | technology_ai |
-| Ars Technica | technology_ai |
-| IEEE Spectrum | technology_ai |
-| Hacker News | startups_ipo |
-| Y Combinator Blog | startups_ipo |
-| The Verge | startups_ipo |
-| Entrepreneur | startups_ipo |
-| TechCrunch | startups_ipo |
-| The Hindu Business Line | emerging_markets_asia |
-| Mint (India) | emerging_markets_asia |
-| Zero Hedge | market_news_alternative |
-| Wolf Street | market_news_alternative |
-| Econbrowser | market_news_alternative |
-| A Wealth of Common Sense | market_news_alternative |
-| The Big Picture (Ritholtz) | market_news_alternative |
-| Farnam Street | market_news_alternative |
-| Asymco | market_news_alternative |
-| The Daily Upside | market_news |
-| Rest of World | emerging_markets |
-| TechCabal | emerging_markets_africa |
-| Techpoint Africa | emerging_markets_africa |
-| How We Made It In Africa | emerging_markets_africa |
-
-**YouTube RSS (1)**
-
-| Source | Category |
-|--------|----------|
-| Y Combinator | startups_ipo |
-
-Full machine-readable list: `GET /v1/knowledge/sources`
+| Category | Sources |
+|---|---|
+| **Technology / AI** | Lex Fridman Podcast, Dwarkesh Podcast, Hard Fork, This Week in Tech, ChinaTalk, Ars Technica, Import AI, TLDR Tech, 404 Media, Wired, arXiv AI |
+| **Startups / VC** | Acquired, How I Built This, Y Combinator Blog, Y Combinator (YouTube), TechCrunch, The Verge, Entrepreneur, The Generalist, Parsers VC |
+| **Markets / Macro** | All-In Podcast, Prof G Markets, Zero Hedge, Calculated Risk, Econbrowser, A Wealth of Common Sense, The Big Picture, The Daily Upside, Asymco, Noahpinion |
+| **Emerging Markets** | Rest of World, TechCabal, Techpoint Africa, Disrupt Africa, Mint (India), Asia Times, The Hindu Business Line |
+| **Policy / Regulation** | Politico Europe, arXiv Policy |
 
 ---
 
 ## Pricing
 
-| Tier | Price | Rate limit | Features |
-|------|-------|------------|----------|
-| Trial | Free | 100 req/day | Latest items, 3 days |
-| Pro | $20/month | 1,000 req/day | Latest + semantic search |
-| Fleet | $99/month | 10,000 req/day | Everything, bulk access |
+| Plan | Price | Requests |
+|---|---|---|
+| Trial | Free — 14 days | 100 / day |
+| Basic | £29 / month | 1,000 / day |
+| Pro | £79 / month | Unlimited + custom sources |
 
-Upgrade via `/v1/payments/checkout` (Stripe or crypto).
+[Request access →](mailto:agentbc9000@gmail.com?subject=AgentDB%20Access%20Request)
+
+---
+
+## How it works
+
+```
+GitHub Actions (Mon/Wed/Fri 07:00 UTC)
+    ↓
+scraper/run.py — fetches RSS/HTML from 41 sources
+    ↓
+scraper/summariser.py — DeepSeek Flash → structured JSON
+    ↓
+scraper/ingest.py — writes to Supabase via PostgREST
+    ↓
+mcp/server.py — exposes knowledge as MCP tools
+```
+
+**Stack:** Python · GitHub Actions · DeepSeek Flash · Supabase (pgvector) · Cloudflare Pages
+
+**Cost to run:** ~£2–3/month (DeepSeek API calls only — everything else is free tier).
+
+---
+
+## Repo structure
+
+```
+mcp/
+  server.py           # MCP server — connect to Claude Desktop / Cursor
+scraper/
+  run.py              # Orchestrator — called by GitHub Actions
+  sources.py          # 41 source definitions (RSS URLs, categories)
+  scraper.py          # HTTP fetch + HTML parsing
+  summariser.py       # DeepSeek Flash summarisation
+  ingest.py           # Supabase PostgREST write
+  keepalive.py        # Keeps Supabase free tier active
+db/
+  migrations/
+    001_create_knowledge_table.sql
+    002_read_policy.sql
+.github/
+  workflows/
+    scraper.yml       # Mon/Wed/Fri scrape cron
+    keepalive.yml     # Every 6h Supabase ping
+index.html            # Website (agentdb.pages.dev)
+```
 
 ---
 
 ## Self-hosting
 
-```bash
-git clone https://github.com/AgentBC9000/agentdb
-cd agentdb
-cp .env.example .env   # fill in ANTHROPIC_API_KEY, DATABASE_URL, ADMIN_SECRET
-docker-compose up
+Clone the repo and set up GitHub Actions secrets:
+
+```
+DEEPSEEK_API_KEY       — DeepSeek API key (api.deepseek.com)
+SUPABASE_URL           — Supabase project URL
+SUPABASE_SERVICE_KEY   — Supabase service role key (for writes)
+AGENTDB_DATABASE_URL   — Supabase direct DB URL (for keepalive)
+RESEND_API_KEY         — Resend API key (for run reports)
+REPORT_EMAIL           — Email to send scraper reports to
 ```
 
-The scraper runs independently — trigger it manually or set a cron:
+Run the SQL migrations in Supabase → SQL Editor:
+- `db/migrations/001_create_knowledge_table.sql`
+- `db/migrations/002_read_policy.sql`
 
-```bash
-cd scraper
-ANTHROPIC_API_KEY=... AGENTDB_API_URL=... ADMIN_SECRET=... python run.py
-```
+Enable Row Level Security on the `knowledge` table, then trigger a manual run from GitHub Actions → AgentDB Scraper → Run workflow.
+
+---
+
+## Contact
+
+[agentbc9000@gmail.com](mailto:agentbc9000@gmail.com) · [agentdb.pages.dev](https://agentdb.pages.dev)

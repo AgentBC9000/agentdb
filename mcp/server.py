@@ -7,24 +7,34 @@
 AgentDB MCP Server
 Exposes the AgentDB knowledge base as tools for Claude and other MCP-compatible agents.
 
+Requires two environment variables:
+  AGENTDB_SUPABASE_URL  — your Supabase project URL (e.g. https://xxxx.supabase.co)
+  AGENTDB_API_KEY       — your AgentDB API key (contact agentbc9000@gmail.com)
+
 Quick start (requires uv — https://docs.astral.sh/uv/getting-started/installation/):
-    AGENTDB_API_KEY=your-key uv run /path/to/agentdb/mcp/server.py
+  AGENTDB_SUPABASE_URL=https://xxxx.supabase.co \\
+  AGENTDB_API_KEY=your-key \\
+  uv run /path/to/agentdb/mcp/server.py
 
 Claude Desktop / Claude Code — add to ~/.claude.json or project .mcp.json:
-    {
-      "mcpServers": {
-        "agentdb": {
-          "command": "uv",
-          "args": ["run", "/absolute/path/to/agentdb/mcp/server.py"],
-          "env": { "AGENTDB_API_KEY": "your-key-here" }
+  {
+    "mcpServers": {
+      "agentdb": {
+        "command": "uv",
+        "args": ["run", "/absolute/path/to/agentdb/mcp/server.py"],
+        "env": {
+          "AGENTDB_SUPABASE_URL": "https://xxxx.supabase.co",
+          "AGENTDB_API_KEY": "your-key-here"
         }
       }
     }
+  }
 
-Get an API key at https://agentdb.dev
+Request access at https://agentdb.pages.dev
 """
 
 import asyncio
+import json
 import os
 
 import httpx
@@ -34,11 +44,11 @@ from mcp import types
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
-API_URL = os.environ.get(
-    "AGENTDB_API_URL",
-    "https://agentdb-production-9ba0.up.railway.app",
-).rstrip("/")
+SUPABASE_URL = os.environ.get("AGENTDB_SUPABASE_URL", "").rstrip("/")
 API_KEY = os.environ.get("AGENTDB_API_KEY", "")
+
+# Columns to select — excludes the embedding vector (large, not useful to agents)
+SELECT_COLS = "id,title,content_type,summary,body,tags,source_url,confidence,relevance_score,published_at"
 
 # ── Server ────────────────────────────────────────────────────────────────────
 
@@ -51,12 +61,12 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="get_latest_knowledge",
             description=(
-                "Fetch the latest knowledge items from AgentDB — a curated, "
-                "real-time knowledge base updated Mon/Wed/Fri with summaries "
-                "from YouTube channels, blogs, and research sources covering "
-                "markets, technology, science, philosophy, and current events. "
-                "Use this to get fresh context before answering questions or "
-                "when the user asks about recent developments."
+                "Fetch the latest knowledge items from AgentDB — a curated knowledge "
+                "base updated Mon/Wed/Fri from 41 sources covering AI/tech, startups, "
+                "alternative markets, and emerging economies (Africa & Asia). Each item "
+                "is an AI-generated structured summary with key points, tags, and a "
+                "confidence score. Use this to give your agent fresh context before "
+                "answering questions about recent developments."
             ),
             inputSchema={
                 "type": "object",
@@ -72,13 +82,12 @@ async def list_tools() -> list[types.Tool]:
                         "type": "string",
                         "description": (
                             "Comma-separated tags to filter by. "
-                            "Examples: 'ai,machine-learning', 'market-news', "
-                            "'quantum-mechanics', 'startups'"
+                            "Examples: 'ai', 'startups', 'markets', 'emerging-markets'"
                         ),
                     },
                     "content_type": {
                         "type": "string",
-                        "description": "Filter by content type",
+                        "description": "Filter by content type: article, video, research, or data",
                         "enum": ["article", "video", "research", "data"],
                     },
                 },
@@ -87,17 +96,16 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="search_knowledge",
             description=(
-                "Search AgentDB using a natural language query. Returns the most "
-                "semantically relevant knowledge items. Use this when you need "
-                "specific information on a topic rather than just the latest items."
-                "\n\nRequires a Pro API key."
+                "Search AgentDB knowledge items by keyword. Searches titles and summaries. "
+                "Use this when you need information on a specific topic rather than "
+                "just the latest items."
             ),
             inputSchema={
                 "type": "object",
                 "properties": {
                     "query": {
                         "type": "string",
-                        "description": "Natural language search query",
+                        "description": "Keyword or phrase to search for",
                     },
                     "limit": {
                         "type": "integer",
@@ -115,54 +123,67 @@ async def list_tools() -> list[types.Tool]:
 
 @app.call_tool()
 async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
+    if not SUPABASE_URL:
+        return [types.TextContent(
+            type="text",
+            text="Error: AGENTDB_SUPABASE_URL environment variable is not set.",
+        )]
     if not API_KEY:
         return [types.TextContent(
             type="text",
-            text="Error: AGENTDB_API_KEY environment variable is not set.",
+            text="Error: AGENTDB_API_KEY environment variable is not set. Request access at https://agentdb.pages.dev",
         )]
 
-    headers = {"X-API-Key": API_KEY}
+    headers = {
+        "apikey": API_KEY,
+        "Authorization": f"Bearer {API_KEY}",
+    }
+    rest_url = f"{SUPABASE_URL}/rest/v1/knowledge"
 
     try:
         async with httpx.AsyncClient(timeout=15) as client:
-            if name == "get_latest_knowledge":
-                params: dict = {"limit": arguments.get("limit", 10)}
-                if arguments.get("tags"):
-                    params["tags"] = arguments["tags"]
-                if arguments.get("content_type"):
-                    params["content_type"] = arguments["content_type"]
 
-                resp = await client.get(
-                    f"{API_URL}/v1/knowledge/latest",
-                    headers=headers,
-                    params=params,
-                )
+            if name == "get_latest_knowledge":
+                params: dict[str, str | int] = {
+                    "select": SELECT_COLS,
+                    "is_active": "eq.true",
+                    "order": "published_at.desc",
+                    "limit": arguments.get("limit", 10),
+                }
+                # Tag filter — PostgREST array contains: tags=cs.{ai,startups}
+                if arguments.get("tags"):
+                    tag_list = ",".join(
+                        t.strip() for t in arguments["tags"].split(",") if t.strip()
+                    )
+                    params["tags"] = f"cs.{{{tag_list}}}"
+                # Content type filter
+                if arguments.get("content_type"):
+                    params["content_type"] = f"eq.{arguments['content_type']}"
+
+                resp = await client.get(rest_url, headers=headers, params=params)
                 resp.raise_for_status()
-                data = resp.json()
-                return [types.TextContent(type="text", text=_format_items(data["items"]))]
+                items = resp.json()
+                return [types.TextContent(type="text", text=_format_items(items))]
 
             elif name == "search_knowledge":
-                resp = await client.get(
-                    f"{API_URL}/v1/knowledge/search",
-                    headers=headers,
-                    params={
-                        "q": arguments["query"],
-                        "limit": arguments.get("limit", 5),
-                    },
-                )
-                if resp.status_code == 403:
-                    return [types.TextContent(
-                        type="text",
-                        text="Semantic search requires an AgentDB Pro key. Get one at https://agentdb.dev/pricing",
-                    )]
+                query = arguments["query"].strip()
+                # ilike search across title and summary
+                params = {
+                    "select": SELECT_COLS,
+                    "is_active": "eq.true",
+                    "or": f"(title.ilike.*{query}*,summary.ilike.*{query}*)",
+                    "order": "published_at.desc",
+                    "limit": arguments.get("limit", 5),
+                }
+                resp = await client.get(rest_url, headers=headers, params=params)
                 resp.raise_for_status()
-                data = resp.json()
-                return [types.TextContent(type="text", text=_format_items(data["items"]))]
+                items = resp.json()
+                return [types.TextContent(type="text", text=_format_items(items))]
 
     except httpx.HTTPStatusError as exc:
         return [types.TextContent(
             type="text",
-            text=f"AgentDB API error (HTTP {exc.response.status_code}): {exc.response.text[:200]}",
+            text=f"AgentDB error (HTTP {exc.response.status_code}): {exc.response.text[:300]}",
         )]
     except httpx.HTTPError as exc:
         return [types.TextContent(type="text", text=f"Network error: {exc}")]
@@ -179,6 +200,12 @@ def _format_items(items: list) -> str:
     parts = []
     for item in items:
         body = item.get("body") or {}
+        if isinstance(body, str):
+            try:
+                body = json.loads(body)
+            except Exception:
+                body = {}
+
         key_points = body.get("key_points", [])
         source_name = body.get("source_name", "")
 
@@ -209,7 +236,9 @@ def _format_items(items: list) -> str:
             for kp in key_points:
                 lines.append(f"  • {kp}")
 
-        lines.append(f"\nID: {item['id']}")
+        if item.get("source_url"):
+            lines.append(f"\nSource: {item['source_url']}")
+
         parts.append("\n".join(lines))
 
     return "\n\n---\n\n".join(parts)
@@ -226,10 +255,5 @@ async def main() -> None:
         )
 
 
-def main_sync() -> None:
-    """Entry point for the agentdb-mcp script."""
-    asyncio.run(main())
-
-
 if __name__ == "__main__":
-    main_sync()
+    asyncio.run(main())
