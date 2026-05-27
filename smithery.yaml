@@ -1,0 +1,25 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      supabaseUrl:
+        type: string
+        description: "Your AgentDB Supabase URL (provided when you request access)"
+        title: "Supabase URL"
+      apiKey:
+        type: string
+        description: "Your AgentDB API key (request access at https://agentdb.pages.dev)"
+        title: "API Key"
+    required:
+      - supabaseUrl
+      - apiKey
+  commandFunction: |-
+    (config) => ({
+      command: 'uv',
+      args: ['run', 'mcp/server.py'],
+      env: {
+        AGENTDB_SUPABASE_URL: config.supabaseUrl,
+        AGENTDB_API_KEY: config.apiKey
+      }
+    })
