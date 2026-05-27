@@ -37,10 +37,29 @@ async def ping():
     # Parse URL components individually so special characters in the password
     # (e.g. @, /, #) don't break asyncpg's own URL parser.
     parsed = urlparse(url)
+    try:
+        port = parsed.port or 5432
+    except ValueError:
+        print(
+            f"ERROR: AGENTDB_DATABASE_URL has a malformed port — "
+            f"got {parsed._hostinfo!r}. "
+            f"Expected format: postgresql://postgres:PASSWORD@db.HOST.supabase.co:5432/postgres",
+            flush=True,
+        )
+        sys.exit(1)
+
+    if not parsed.hostname:
+        print(
+            "ERROR: AGENTDB_DATABASE_URL is missing the hostname. "
+            "Expected format: postgresql://postgres:PASSWORD@db.HOST.supabase.co:5432/postgres",
+            flush=True,
+        )
+        sys.exit(1)
+
     connect_kwargs = dict(
         host=parsed.hostname,
-        port=parsed.port or 5432,
-        user=parsed.username,
+        port=port,
+        user=parsed.username or "postgres",
         password=unquote(parsed.password) if parsed.password else None,
         database=(parsed.path or "/postgres").lstrip("/") or "postgres",
         ssl="require",
