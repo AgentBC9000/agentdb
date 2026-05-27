@@ -779,7 +779,7 @@
       <div style="display:flex;align-items:center;gap:20px">
         <a href="#sources" style="font-size:0.875rem;color:var(--text-dim)">Sources</a>
         <a href="#pricing" style="font-size:0.875rem;color:var(--text-dim)">Pricing</a>
-        <a href="#pricing" class="btn btn-primary" onclick="openRegister(event)">Start Free Trial</a>
+        <a href="mailto:agentbc9000@gmail.com?subject=AgentDB%20Access%20Request" class="btn btn-primary">Request Access</a>
       </div>
     </div>
   </nav>
@@ -787,16 +787,16 @@
   <!-- ── HERO ── -->
   <div class="hero">
     <div class="hero-left">
-      <div class="hero-badge">Updated Mon/Wed/Fri &middot; Curated sources &middot; Agent-native</div>
+      <div class="hero-badge">Early access &middot; Updated Mon/Wed/Fri &middot; 41 sources</div>
       <h1>Fresh <span class="accent">RAG context</span> for AI agents</h1>
       <p class="hero-sub">
         A curated knowledge base your agent queries at inference time — not training data.
-        Podcasts, blogs, and research papers — scraped, summarised by Claude, and structured for agent consumption.
+        Podcasts, blogs, and research papers — scraped, AI-summarised, and structured for agent consumption.
         Updated Mon/Wed/Fri across AI, startups, alternative markets, and emerging economies.
       </p>
       <div class="hero-ctas">
-        <a href="#pricing" class="btn btn-primary" onclick="openRegister(event)">Start Free Trial</a>
-        <a href="https://agentdb-production-9ba0.up.railway.app/docs" target="_blank" rel="noopener" class="btn btn-outline">View Docs</a>
+        <a href="mailto:agentbc9000@gmail.com?subject=AgentDB%20Access%20Request" class="btn btn-primary">Request Access</a>
+        <a href="#sources" class="btn btn-outline">View Sources</a>
       </div>
     </div>
 
@@ -808,7 +808,7 @@
         </div>
         <pre><span class="t-comment"># Fetch the latest knowledge for your agent</span>
 <span class="t-cmd">curl</span> \
-  <span class="t-url">"https://agentdb-production-9ba0.up.railway.app/v1/knowledge/latest?tags=ai&amp;limit=3"</span> \
+  <span class="t-url">"https://api.agentdb.ai/v1/knowledge/latest?tags=ai&amp;limit=3"</span> \
   <span class="t-flag">-H</span> <span class="t-str">"X-API-Key: adb_xxxxxxxxxxxxxxxxxxxx"</span>
 
 <span class="t-comment"># Response — structured, agent-ready</span>
@@ -834,18 +834,18 @@
       <div class="steps">
         <div class="step">
           <div class="step-number">01</div>
-          <h3>Register</h3>
+          <h3>Get access</h3>
           <p>
-            Call the <code style="font-family:var(--mono);font-size:0.78rem;color:var(--accent)">/v1/auth/register</code> endpoint
-            with your agent's identifier. Get an API key back instantly — no dashboard, no forms.
+            Email us to request early access. We'll set up your account and send your API key
+            — no dashboard, no forms.
           </p>
         </div>
         <div class="step">
           <div class="step-number">02</div>
           <h3>Query</h3>
           <p>
-            Fetch the latest items or search semantically. Content comes from podcasts, blogs,
-            and research papers — each one scraped and summarised by Claude into structured JSON.
+            Fetch the latest items or search by tag. Content comes from podcasts, blogs,
+            and research papers — each one scraped and AI-summarised into structured JSON.
           </p>
         </div>
         <div class="step">
@@ -874,7 +874,7 @@
           </div>
           <pre><span class="t-comment"># Latest items, optionally filtered by tag</span>
 <span class="t-cmd">curl</span> \
-  <span class="t-url">"https://agentdb-production-9ba0.up.railway.app/v1/knowledge/latest"</span> \
+  <span class="t-url">"https://api.agentdb.ai/v1/knowledge/latest"</span> \
   <span class="t-flag">-H</span> <span class="t-str">"X-API-Key: $AGENTDB_API_KEY"</span>
 
 <span class="t-comment"># Filter by tag and page size</span>
@@ -920,7 +920,7 @@
       <div class="section-label">The compression advantage</div>
       <h2 class="section-title">Same signal. ~15× fewer tokens.</h2>
       <p style="color:var(--text-dim);margin-bottom:40px;max-width:640px">
-        Every source item is processed by Claude before it hits the API. You get a structured
+        Every source item is AI-processed before it hits the API. You get a structured
         summary and key points — not a raw transcript your agent has to parse itself.
       </p>
       <div class="compare-grid">
@@ -981,29 +981,28 @@ That's a very different thing.</span></pre>
             <span class="source-tag">Dwarkesh Podcast</span>
             <span class="source-tag">Hard Fork</span>
             <span class="source-tag">This Week in Tech</span>
-            <span class="source-tag">The Tech Report</span>
-            <span class="source-tag">MIT Technology Review</span>
+            <span class="source-tag">ChinaTalk</span>
             <span class="source-tag">Ars Technica</span>
             <span class="source-tag">Import AI</span>
             <span class="source-tag">TLDR Tech</span>
-            <span class="source-tag">IEEE Spectrum</span>
-            <span class="source-tag">Benedict Evans</span>
+            <span class="source-tag">404 Media</span>
+            <span class="source-tag">Wired</span>
             <span class="source-tag">arXiv AI</span>
           </div>
         </div>
 
         <div class="source-cat">
-          <div class="source-cat-label">Startups / IPO</div>
+          <div class="source-cat-label">Startups / VC</div>
           <div class="source-tags">
             <span class="source-tag">Acquired</span>
             <span class="source-tag">How I Built This</span>
             <span class="source-tag">Y Combinator Blog</span>
             <span class="source-tag">Y Combinator (YouTube)</span>
-            <span class="source-tag">Hacker News</span>
             <span class="source-tag">TechCrunch</span>
             <span class="source-tag">The Verge</span>
             <span class="source-tag">Entrepreneur</span>
             <span class="source-tag">The Generalist</span>
+            <span class="source-tag">Parsers VC</span>
           </div>
         </div>
 
@@ -1013,14 +1012,13 @@ That's a very different thing.</span></pre>
             <span class="source-tag">All-In Podcast</span>
             <span class="source-tag">Prof G Markets</span>
             <span class="source-tag">Zero Hedge</span>
-            <span class="source-tag">Wolf Street</span>
+            <span class="source-tag">Calculated Risk</span>
             <span class="source-tag">Econbrowser</span>
             <span class="source-tag">A Wealth of Common Sense</span>
             <span class="source-tag">The Big Picture</span>
             <span class="source-tag">The Daily Upside</span>
-            <span class="source-tag">Farnam Street</span>
             <span class="source-tag">Asymco</span>
-            <span class="source-tag">Marginal Revolution</span>
+            <span class="source-tag">Noahpinion</span>
           </div>
         </div>
 
@@ -1030,8 +1028,9 @@ That's a very different thing.</span></pre>
             <span class="source-tag">Rest of World</span>
             <span class="source-tag">TechCabal</span>
             <span class="source-tag">Techpoint Africa</span>
-            <span class="source-tag">How We Made It In Africa</span>
+            <span class="source-tag">Disrupt Africa</span>
             <span class="source-tag">Mint (India)</span>
+            <span class="source-tag">Asia Times</span>
             <span class="source-tag">The Hindu Business Line</span>
           </div>
         </div>
@@ -1046,9 +1045,7 @@ That's a very different thing.</span></pre>
 
       </div>
       <p style="margin-top:32px;font-size:0.85rem;color:var(--text-muted)">
-        Full machine-readable list:
-        <code style="font-family:var(--mono);color:var(--accent);font-size:0.78rem">GET /v1/knowledge/sources</code>
-        &nbsp;(public, no key required)
+        41 sources · updated Mon/Wed/Fri at 07:00 UTC
       </p>
     </div>
   </section>
@@ -1064,49 +1061,49 @@ That's a very different thing.</span></pre>
         <div class="plan">
           <div class="plan-name">Trial</div>
           <div class="plan-price">Free</div>
-          <div class="plan-cadence">3-day trial</div>
+          <div class="plan-cadence">14-day trial</div>
           <hr class="plan-divider" />
           <ul class="plan-features">
             <li>100 requests / day</li>
             <li>Full API access</li>
             <li>All knowledge categories</li>
-            <li>JSON + compressed formats</li>
+            <li>Structured JSON output</li>
             <li>No credit card required</li>
           </ul>
-          <a href="#" class="btn btn-outline" onclick="openRegister(event)">Get API Key</a>
+          <a href="mailto:agentbc9000@gmail.com?subject=AgentDB%20Access%20Request" class="btn btn-outline">Request Access</a>
         </div>
 
         <!-- Basic -->
         <div class="plan featured">
           <div class="plan-badge">Most Popular</div>
           <div class="plan-name">Basic</div>
-          <div class="plan-price"><sup>£</sup>10</div>
-          <div class="plan-cadence">per week</div>
+          <div class="plan-price"><sup>£</sup>29</div>
+          <div class="plan-cadence">per month</div>
           <hr class="plan-divider" />
           <ul class="plan-features">
             <li>1,000 requests / day</li>
             <li>Full API access</li>
             <li>All knowledge categories</li>
-            <li>JSON + compressed formats</li>
-            <li>Priority response times</li>
+            <li>Structured JSON output</li>
+            <li>Email support</li>
           </ul>
-          <a href="#" class="btn btn-primary" onclick="openRegister(event)">Get API Key</a>
+          <a href="mailto:agentbc9000@gmail.com?subject=AgentDB%20Basic%20Plan" class="btn btn-primary">Request Access</a>
         </div>
 
         <!-- Pro -->
         <div class="plan">
           <div class="plan-name">Pro</div>
-          <div class="plan-price"><sup>£</sup>25</div>
-          <div class="plan-cadence">per week</div>
+          <div class="plan-price"><sup>£</sup>79</div>
+          <div class="plan-cadence">per month</div>
           <hr class="plan-divider" />
           <ul class="plan-features">
             <li>Unlimited requests</li>
             <li>Full API access</li>
             <li>All knowledge categories</li>
-            <li>JSON + compressed formats</li>
-            <li>Priority support</li>
+            <li>Structured JSON output</li>
+            <li>Priority support + custom sources</li>
           </ul>
-          <a href="#" class="btn btn-outline" onclick="openRegister(event)">Get API Key</a>
+          <a href="mailto:agentbc9000@gmail.com?subject=AgentDB%20Pro%20Plan" class="btn btn-outline">Request Access</a>
         </div>
 
       </div>
@@ -1123,162 +1120,16 @@ That's a very different thing.</span></pre>
       <nav class="footer-links">
         <a href="#sources">Sources</a>
         <a href="#pricing">Pricing</a>
-        <a href="https://agentdb-production-9ba0.up.railway.app/docs" target="_blank" rel="noopener">Docs</a>
         <a href="mailto:agentbc9000@gmail.com">Contact</a>
       </nav>
       <div class="footer-copy">
-        &copy; 2026 AgentDB &mdash; API endpoint: <code style="font-family:var(--mono);font-size:0.78rem;color:var(--text-muted)">agentdb-production-9ba0.up.railway.app</code>
-        &nbsp;&middot;&nbsp; Moving to <code style="font-family:var(--mono);font-size:0.78rem;color:var(--accent)">agentdb.ai</code> soon
+        &copy; 2026 AgentDB &mdash; Early access &middot; <a href="mailto:agentbc9000@gmail.com" style="color:var(--text-muted)">agentbc9000@gmail.com</a>
       </div>
     </div>
   </footer>
 
-  <!-- ── REGISTER MODAL ── -->
-  <div class="modal-overlay" id="registerModal" onclick="closeModalOnBg(event)">
-    <div class="modal">
-      <div class="modal-header">
-        <div class="modal-title">Get your API key</div>
-        <button class="modal-close" onclick="closeRegister()" aria-label="Close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p class="modal-desc">
-          AgentDB is API-first. Register your agent with a single POST request to get your key instantly.
-        </p>
-        <div class="modal-tabs">
-          <button class="tab-btn active" onclick="switchTab(event,'curl')">cURL</button>
-          <button class="tab-btn" onclick="switchTab(event,'python')">Python</button>
-          <button class="tab-btn" onclick="switchTab(event,'js')">JavaScript</button>
-        </div>
-
-        <div id="tab-curl" class="tab-panel active">
-          <div class="code-block">
-            <div class="code-header">
-              <div class="code-dots"><span></span><span></span><span></span></div>
-              <div class="code-label">cURL</div>
-            </div>
-            <pre id="code-curl"><span class="t-cmd">curl</span> <span class="t-flag">-s -X POST</span> \
-  <span class="t-url">"https://agentdb-production-9ba0.up.railway.app/v1/auth/register"</span> \
-  <span class="t-flag">-H</span> <span class="t-str">"Content-Type: application/json"</span> \
-  <span class="t-flag">-d</span> <span class="t-str">'{}'</span></pre>
-          </div>
-          <button class="copy-btn" onclick="copyCode('curl-raw')">Copy command</button>
-        </div>
-
-        <div id="tab-python" class="tab-panel">
-          <div class="code-block">
-            <div class="code-header">
-              <div class="code-dots"><span></span><span></span><span></span></div>
-              <div class="code-label">Python</div>
-            </div>
-            <pre><span class="t-key">import</span> <span class="t-str">httpx</span>
-
-<span class="t-val">res</span> = httpx.<span class="t-cmd">post</span>(
-    <span class="t-str">"https://agentdb-production-9ba0.up.railway.app/v1/auth/register"</span>
-)
-<span class="t-val">api_key</span> = res.<span class="t-cmd">json</span>()[<span class="t-str">"api_key"</span>]
-<span class="t-key">print</span>(<span class="t-str">f"Your key: </span><span class="t-val">{api_key}</span><span class="t-str">"</span>)
-
-<span class="t-comment"># Then query the API</span>
-<span class="t-val">data</span> = httpx.<span class="t-cmd">get</span>(
-    <span class="t-str">"https://agentdb-production-9ba0.up.railway.app/v1/knowledge/latest"</span>,
-    headers=<span class="t-brace">{</span><span class="t-str">"X-API-Key"</span>: api_key<span class="t-brace">}</span>,
-    params=<span class="t-brace">{</span><span class="t-str">"tags"</span>: <span class="t-str">"ai"</span>, <span class="t-str">"limit"</span>: <span class="t-num">5</span><span class="t-brace">}</span>
-).<span class="t-cmd">json</span>()</pre>
-          </div>
-          <button class="copy-btn" onclick="copyCode('python-raw')">Copy snippet</button>
-        </div>
-
-        <div id="tab-js" class="tab-panel">
-          <div class="code-block">
-            <div class="code-header">
-              <div class="code-dots"><span></span><span></span><span></span></div>
-              <div class="code-label">JavaScript</div>
-            </div>
-            <pre><span class="t-comment">// Register</span>
-<span class="t-key">const</span> <span class="t-brace">{</span> <span class="t-val">api_key</span> <span class="t-brace">}</span> = <span class="t-key">await</span> <span class="t-cmd">fetch</span>(
-  <span class="t-str">"https://agentdb-production-9ba0.up.railway.app/v1/auth/register"</span>,
-  <span class="t-brace">{</span> method: <span class="t-str">"POST"</span> <span class="t-brace">}</span>
-).<span class="t-cmd">then</span>(r => r.<span class="t-cmd">json</span>());
-
-<span class="t-comment">// Fetch knowledge</span>
-<span class="t-key">const</span> <span class="t-val">data</span> = <span class="t-key">await</span> <span class="t-cmd">fetch</span>(
-  <span class="t-str">"https://agentdb-production-9ba0.up.railway.app/v1/knowledge/latest?tags=ai&amp;limit=5"</span>,
-  <span class="t-brace">{</span> headers: <span class="t-brace">{</span> <span class="t-str">"X-API-Key"</span>: <span class="t-val">api_key</span> <span class="t-brace">} }</span>
-).<span class="t-cmd">then</span>(r => r.<span class="t-cmd">json</span>());</pre>
-          </div>
-          <button class="copy-btn" onclick="copyCode('js-raw')">Copy snippet</button>
-        </div>
-
-        <!-- hidden raw text for copy -->
-        <textarea id="curl-raw" style="position:absolute;opacity:0;pointer-events:none" readonly>curl -s -X POST \
-  "https://agentdb-production-9ba0.up.railway.app/v1/auth/register" \
-  -H "Content-Type: application/json" \
-  -d '{}'</textarea>
-        <textarea id="python-raw" style="position:absolute;opacity:0;pointer-events:none" readonly>import httpx
-
-res = httpx.post("https://agentdb-production-9ba0.up.railway.app/v1/auth/register")
-api_key = res.json()["api_key"]
-
-data = httpx.get(
-    "https://agentdb-production-9ba0.up.railway.app/v1/knowledge/latest",
-    headers={"X-API-Key": api_key},
-    params={"tags": "ai", "limit": 5}
-).json()</textarea>
-        <textarea id="js-raw" style="position:absolute;opacity:0;pointer-events:none" readonly>const { api_key } = await fetch(
-  "https://agentdb-production-9ba0.up.railway.app/v1/auth/register",
-  { method: "POST" }
-).then(r => r.json());
-
-const data = await fetch(
-  "https://agentdb-production-9ba0.up.railway.app/v1/knowledge/latest?tags=ai&limit=5",
-  { headers: { "X-API-Key": api_key } }
-).then(r => r.json());</textarea>
-      </div>
-    </div>
-  </div>
-
   <script>
-    function openRegister(e) {
-      e && e.preventDefault();
-      document.getElementById('registerModal').classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeRegister() {
-      document.getElementById('registerModal').classList.remove('open');
-      document.body.style.overflow = '';
-    }
-
-    function closeModalOnBg(e) {
-      if (e.target === document.getElementById('registerModal')) closeRegister();
-    }
-
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeRegister();
-    });
-
-    function switchTab(e, tab) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-      e.target.classList.add('active');
-      document.getElementById('tab-' + tab).classList.add('active');
-    }
-
-    function copyCode(id) {
-      const el = document.getElementById(id);
-      el.select();
-      document.execCommand('copy');
-      const btn = event.target;
-      const orig = btn.textContent;
-      btn.textContent = 'Copied!';
-      btn.style.borderColor = 'var(--accent)';
-      btn.style.color = 'var(--accent)';
-      setTimeout(() => {
-        btn.textContent = orig;
-        btn.style.borderColor = '';
-        btn.style.color = '';
-      }, 1800);
-    }
+    // No modal needed — all CTAs use mailto links
   </script>
 </body>
 </html>
