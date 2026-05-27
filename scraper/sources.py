@@ -272,31 +272,16 @@ BLOG_SOURCES = [
         "category": "emerging_markets_asia",
     },
     {
-        "name": "Asia Times",
-        "rss_url": "https://asiatimes.com/feed/",
-        "category": "emerging_markets_asia",
-    },
-    {
-        "name": "TechTrends Africa",
-        "rss_url": "https://techtrendsafrica.com/feed/",
-        "category": "emerging_markets_africa",
-    },
-    {
         "name": "Parsers VC",
         "rss_url": "https://parsers.substack.com/feed",
         "category": "startups_ipo",
         "rss_text_mode": True,  # Substack full-post content in RSS entry
     },
-    {
-        "name": "Intelligent CIO LatAm",
-        "rss_url": "https://www.intelligentcio.com/latam/feed/",
-        "category": "emerging_markets",
-    },
-    {
-        "name": "Digitalisation World",
-        "rss_url": "https://digitalisationworld.com/rss/news",
-        "category": "technology_ai",
-    },
+    # Removed (confirmed dead as of 2026-05-27):
+    #   Asia Times          — consistently returns <60 chars (hard paywall / bot block)
+    #   TechTrends Africa   — site is a "Hello world!" WordPress placeholder
+    #   Intelligent CIO LatAm — HTTP 403 on every request
+    #   Digitalisation World  — RSS feed throws invalid-token parse error
 ]
 
 # YouTube RSS — video title + description from RSS entry (no transcript).

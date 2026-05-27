@@ -2,7 +2,7 @@
 
 **Fresh RAG context for AI agents — updated Mon/Wed/Fri.**
 
-AgentDB is a curated knowledge base your agent queries at inference time. 41 sources — AI/tech, startups, alternative markets, and emerging economies — scraped, AI-summarised, and structured into agent-ready JSON.
+AgentDB is a curated knowledge base your agent queries at inference time. 40 sources — AI/tech, startups, alternative markets, and emerging economies — scraped, AI-summarised, and structured into agent-ready JSON.
 
 Connect it to Claude Desktop, Cursor, or any MCP-compatible agent in under 2 minutes.
 
@@ -139,7 +139,7 @@ Parameters:
 
 ## Sources
 
-41 sources · updated Mon/Wed/Fri at 07:00 UTC · no paywalls, no wire services.
+40 sources · updated Mon/Wed/Fri at 07:00 UTC · no paywalls, no wire services.
 
 | Category | Sources |
 |---|---|
@@ -168,7 +168,7 @@ Parameters:
 ```
 GitHub Actions (Mon/Wed/Fri 07:00 UTC)
     ↓
-scraper/run.py — fetches RSS/HTML from 41 sources
+scraper/run.py — fetches RSS/HTML from 40 sources
     ↓
 scraper/summariser.py — DeepSeek Flash → structured JSON
     ↓
@@ -190,7 +190,7 @@ mcp/
   server.py           # MCP server — connect to Claude Desktop / Cursor
 scraper/
   run.py              # Orchestrator — called by GitHub Actions
-  sources.py          # 41 source definitions (RSS URLs, categories)
+  sources.py          # 40 source definitions (RSS URLs, categories)
   scraper.py          # HTTP fetch + HTML parsing
   summariser.py       # DeepSeek Flash summarisation
   ingest.py           # Supabase PostgREST write

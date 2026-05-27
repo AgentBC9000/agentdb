@@ -17,7 +17,11 @@ import httpx
 logger = logging.getLogger(__name__)
 
 RESEND_API_URL = "https://api.resend.com/emails"
-FROM_ADDRESS = "AgentDB Scraper <onboarding@resend.dev>"
+# onboarding@resend.dev is Resend's test sender — only works when TO address matches
+# the Resend account owner email. Override via RESEND_FROM_ADDRESS once you verify a domain.
+FROM_ADDRESS = os.environ.get(
+    "RESEND_FROM_ADDRESS", "AgentDB Scraper <onboarding@resend.dev>"
+)
 
 
 def _get_config() -> Optional[Dict]:
@@ -33,6 +37,13 @@ def _get_config() -> Optional[Dict]:
     if missing:
         logger.error("Cannot send report — missing env vars: %s", ", ".join(missing))
         return None
+
+    if "onboarding@resend.dev" in FROM_ADDRESS:
+        logger.warning(
+            "Using Resend test sender (onboarding@resend.dev). "
+            "Emails will only deliver if REPORT_EMAIL matches your Resend account address. "
+            "Set RESEND_FROM_ADDRESS to a verified-domain address to send anywhere."
+        )
 
     return {"resend_api_key": resend_api_key, "report_email": report_email}
 
