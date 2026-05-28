@@ -22,10 +22,11 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install asyncpg
+        run: pip install httpx
 
       - name: Ping database
         working-directory: scraper
         env:
-          AGENTDB_DATABASE_URL: ${{ secrets.AGENTDB_DATABASE_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python keepalive.py
