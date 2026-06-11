@@ -2,11 +2,59 @@
 
 **Fresh RAG context for AI agents — updated Mon/Wed/Fri.**
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](requirements.txt)
+[![MCP](https://img.shields.io/badge/MCP-compatible-8A2BE2)](https://modelcontextprotocol.io)
+[![Updated](https://img.shields.io/badge/updated-Mon%2FWed%2FFri%2007%3A00%20UTC-green)](#how-it-works)
+
 AgentDB is a curated knowledge base your agent queries at inference time. 40 sources — AI/tech, startups, alternative markets, and emerging economies — scraped, AI-summarised, and structured into agent-ready JSON.
 
 Connect it to Claude Desktop, Cursor, or any MCP-compatible agent in under 2 minutes.
 
-→ **[Request access](mailto:agentbc9000@gmail.com?subject=AgentDB%20Access%20Request)**
+**[Website](https://agentdb.pages.dev)** · **[Request access](mailto:agentbc9000@gmail.com?subject=AgentDB%20Access%20Request)**
+
+---
+
+## Why AgentDB
+
+Agents need current information at inference time, but raw sources are expensive context. A podcast transcript is ~2,400 tokens; the AgentDB version of the same item is ~160 tokens — a structured summary with key points, tags, and a confidence score. Same signal, ~15× less context.
+
+```json
+{
+  "title": "DeepSeek v4 and the limits of scaling",
+  "content_type": "article",
+  "summary": "DeepSeek's mixture-of-experts approach cuts inference cost...",
+  "body": {
+    "source_name": "Ars Technica",
+    "key_points": [
+      "MoE reduces active parameters by 4× at inference",
+      "Outperforms GPT-4o on coding benchmarks",
+      "Open weights released under MIT licence"
+    ]
+  },
+  "tags": ["ai", "llm", "open-source"],
+  "confidence": 0.93,
+  "published_at": "2026-05-26T07:00:00Z"
+}
+```
+
+## How it works
+
+```
+GitHub Actions (Mon/Wed/Fri 07:00 UTC)
+    ↓
+scraper/run.py — fetches RSS/HTML from 40 sources
+    ↓
+scraper/summariser.py — DeepSeek Flash → structured JSON
+    ↓
+scraper/ingest.py — writes to Supabase via PostgREST
+    ↓
+mcp/server.py — exposes knowledge as MCP tools
+```
+
+**Stack:** Python · GitHub Actions · DeepSeek Flash · Supabase (pgvector) · Cloudflare Pages
+
+**Cost to run:** ~£2–3/month (DeepSeek API calls only — everything else is free tier).
 
 ---
 
@@ -97,39 +145,18 @@ uv run mcp/server.py
 
 Fetch the most recent items, optionally filtered by tag or content type.
 
-```
+```text
 Parameters:
   limit         int     Items to return (1–50, default 10)
   tags          string  Comma-separated tag filter, e.g. "ai,startups"
   content_type  string  article | video | research | data
 ```
 
-Example response item:
-
-```json
-{
-  "title": "DeepSeek v4 and the limits of scaling",
-  "content_type": "article",
-  "summary": "DeepSeek's mixture-of-experts approach cuts inference cost...",
-  "body": {
-    "source_name": "Ars Technica",
-    "key_points": [
-      "MoE reduces active parameters by 4× at inference",
-      "Outperforms GPT-4o on coding benchmarks",
-      "Open weights released under MIT licence"
-    ]
-  },
-  "tags": ["ai", "llm", "open-source"],
-  "confidence": 0.93,
-  "published_at": "2026-05-26T07:00:00Z"
-}
-```
-
 ### `search_knowledge`
 
 Search titles and summaries by keyword.
 
-```
+```text
 Parameters:
   query   string  Keyword or phrase (required)
   limit   int     Results to return (1–20, default 5)
@@ -142,7 +169,7 @@ Parameters:
 40 sources · updated Mon/Wed/Fri at 07:00 UTC · no paywalls, no wire services.
 
 | Category | Sources |
-|---|---|
+| --- | --- |
 | **Technology / AI** | Lex Fridman Podcast, Dwarkesh Podcast, Hard Fork, This Week in Tech, ChinaTalk, Ars Technica, Import AI, TLDR Tech, 404 Media, Wired, arXiv AI |
 | **Startups / VC** | Acquired, How I Built This, Y Combinator Blog, Y Combinator (YouTube), TechCrunch, The Verge, Entrepreneur, The Generalist, Parsers VC |
 | **Markets / Macro** | All-In Podcast, Prof G Markets, Zero Hedge, Calculated Risk, Econbrowser, A Wealth of Common Sense, The Big Picture, The Daily Upside, Asymco, Noahpinion |
@@ -154,7 +181,7 @@ Parameters:
 ## Pricing
 
 | Plan | Price | Requests |
-|---|---|---|
+| --- | --- | --- |
 | Trial | Free — 14 days | 100 / day |
 | Basic | £29 / month | 1,000 / day |
 | Pro | £79 / month | Unlimited + custom sources |
@@ -163,29 +190,9 @@ Parameters:
 
 ---
 
-## How it works
-
-```
-GitHub Actions (Mon/Wed/Fri 07:00 UTC)
-    ↓
-scraper/run.py — fetches RSS/HTML from 40 sources
-    ↓
-scraper/summariser.py — DeepSeek Flash → structured JSON
-    ↓
-scraper/ingest.py — writes to Supabase via PostgREST
-    ↓
-mcp/server.py — exposes knowledge as MCP tools
-```
-
-**Stack:** Python · GitHub Actions · DeepSeek Flash · Supabase (pgvector) · Cloudflare Pages
-
-**Cost to run:** ~£2–3/month (DeepSeek API calls only — everything else is free tier).
-
----
-
 ## Repo structure
 
-```
+```text
 mcp/
   server.py           # MCP server — connect to Claude Desktop / Cursor
 scraper/
@@ -212,7 +219,7 @@ index.html            # Website (agentdb.pages.dev)
 
 Clone the repo and set up GitHub Actions secrets:
 
-```
+```text
 DEEPSEEK_API_KEY       — DeepSeek API key (api.deepseek.com)
 SUPABASE_URL           — Supabase project URL
 SUPABASE_SERVICE_KEY   — Supabase service role key (for writes)
@@ -222,6 +229,7 @@ REPORT_EMAIL           — Email to send scraper reports to
 ```
 
 Run the SQL migrations in Supabase → SQL Editor:
+
 - `db/migrations/001_create_knowledge_table.sql`
 - `db/migrations/002_read_policy.sql`
 
@@ -229,6 +237,10 @@ Enable Row Level Security on the `knowledge` table, then trigger a manual run fr
 
 ---
 
-## Contact
+## Author
 
-[agentbc9000@gmail.com](mailto:agentbc9000@gmail.com) · [agentdb.pages.dev](https://agentdb.pages.dev)
+Built by [Kevin Stephenson](https://github.com/AgentBC9000) — product engineer working on agent infrastructure in London.
+
+[agentdb.pages.dev](https://agentdb.pages.dev) · <agentbc9000@gmail.com>
+
+MIT licensed.
